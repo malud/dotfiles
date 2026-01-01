@@ -20,9 +20,9 @@ install_chezmoi
     fi
       echo "⚠️  Homebrew not found. Install fonts manually."
     else
-      brew install --cask font-jetbrains-mono-nerd-font 2>/dev/null || echo "⚠️  Font may already be installed"
+      brew install --cask font-sauce-code-pro-nerd-font 2>/dev/null || echo "⚠️  Font may already be installed"
       brew tap homebrew/cask-fonts 2>/dev/null || true
-      echo "📦 Installing JetBrains Mono Nerd Font..."
+      echo "📦 Installing SauceCodePro Nerd Font..."
     if command -v brew &>/dev/null; then
   if [[ "$OSTYPE" == "darwin"* ]]; then
 install_fonts() {

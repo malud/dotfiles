@@ -1,35 +1,98 @@
 theme = catppuccin-mocha
-keybind = ctrl+zero=reset_font_size
-keybind = ctrl+minus=decrease_font_size:1
-keybind = ctrl+plus=increase_font_size:1
-keybind = ctrl+shift+enter=toggle_fullscreen
-keybind = ctrl+shift+n=new_window
-keybind = ctrl+shift+w=close_surface
-keybind = ctrl+shift+t=new_tab
-keybind = ctrl+shift+v=paste_from_clipboard
-keybind = ctrl+shift+c=copy_to_clipboard
 
-confirm-close-surface = false
+# Font Configuration
+font-family = "SauceCodePro Nerd Font Mono"
+font-size = 16
+font-feature = -calt
+adjust-cell-height = 0
+adjust-font-baseline = 0
+bold-is-bright = false
 
+# Window Settings
+window-decoration = true
+window-padding-x = 12
+window-padding-y = 12
+window-colorspace = "display-p3"
+window-save-state = always
+
+# Background & Opacity
+background-opacity = 0.95
+background-blur-radius = 17
+unfocused-split-opacity = 0.75
+
+# Cursor
+cursor-style-blink = true
+cursor-style = block
+
+# Clipboard
 copy-on-select = clipboard
 clipboard-write = allow
 clipboard-read = allow
 
+# Shell Integration
 shell-integration-features = cursor,sudo,title
 shell-integration = bash
 
-cursor-style-blink = true
-cursor-style = block
+# Scrollback & Mouse
+scrollback-limit = 50000
+mouse-scroll-multiplier = 2
+focus-follows-mouse = true
 
-unfocused-split-opacity = 0.75
-background-opacity = 0.95
+# Display
+minimum-contrast = 1
 
-window-decoration = true
-window-padding-y = 12
-window-padding-x = 12
+# Surface
+confirm-close-surface = false
 
-font-feature = -calt
-font-size = 14
-font-family = "Hack Nerd Font Mono"
+# === Keybindings ===
 
+# Font size adjustments
+keybind = ctrl+zero=reset_font_size
+keybind = ctrl+minus=decrease_font_size:1
+keybind = ctrl+plus=increase_font_size:1
 
+# Config & Window Management
+keybind = cmd+s>r=reload_config
+keybind = cmd+s>x=close_surface
+keybind = cmd+s>n=new_window
+keybind = ctrl+shift+enter=toggle_fullscreen
+
+# Clipboard
+keybind = ctrl+shift+v=paste_from_clipboard
+keybind = ctrl+shift+c=copy_to_clipboard
+
+# Scrollback search
+keybind = cmd+f=write_scrollback_file:open
+
+# Jump to prompt
+keybind = cmd+g=jump_to_prompt:-1
+keybind = cmd+shift+g=jump_to_prompt:1
+
+# Tab Management
+keybind = cmd+s>c=new_tab
+keybind = ctrl+shift+t=new_tab
+keybind = cmd+s>shift+l=next_tab
+keybind = cmd+s>shift+h=previous_tab
+keybind = cmd+s>comma=move_tab:-1
+keybind = cmd+s>period=move_tab:1
+
+# Quick tab switching
+keybind = cmd+s>1=goto_tab:1
+keybind = cmd+s>2=goto_tab:2
+keybind = cmd+s>3=goto_tab:3
+keybind = cmd+s>4=goto_tab:4
+keybind = cmd+s>5=goto_tab:5
+keybind = cmd+s>6=goto_tab:6
+keybind = cmd+s>7=goto_tab:7
+keybind = cmd+s>8=goto_tab:8
+keybind = cmd+s>9=goto_tab:9
+
+# Split Management
+keybind = cmd+s>\=new_split:right
+keybind = cmd+s>-=new_split:down
+keybind = cmd+s>j=goto_split:bottom
+keybind = cmd+s>k=goto_split:top
+keybind = cmd+s>h=goto_split:left
+keybind = cmd+s>l=goto_split:right
+keybind = cmd+s>z=toggle_split_zoom
+keybind = cmd+s>e=equalize_splits
