@@ -1,6 +1,7 @@
 {{ if eq .chezmoi.os "darwin" -}}
 {{ end -}}
 cask "font-hack-nerd-font"
+cask "font-jetbrains-mono-nerd-font"
 # Fonts
 
 cask "proton-mail"
@@ -9,6 +10,7 @@ cask "devpod"
 cask "docker-desktop"
 cask "ghostty"
 cask "openvpn-connect"
+cask "ngrok"
 # Applications
 
 brew "hugo"
@@ -33,7 +35,6 @@ brew "unibilium"
 brew "utf8proc"
 brew "ncurses"
 brew "libunistring"
-brew "libpostal"
 brew "libmagic"
 brew "libsodium"
 brew "libyaml"
@@ -58,7 +59,6 @@ brew "autoconf"
 
 brew "yara"
 brew "bore-cli"
-brew "ngrok"
 brew "clamav"
 # Security & Networking
 
@@ -110,6 +110,3 @@ brew "starship"
 brew "bash-completion"
 brew "bash"
 # Shell & Terminal
-
-tap "homebrew/cask-fonts"
-
