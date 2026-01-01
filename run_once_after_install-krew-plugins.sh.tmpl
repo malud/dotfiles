@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+{{ if eq .chezmoi.os "darwin" -}}
+set -euo pipefail
+
+echo "📦 Installing krew plugins..."
+
+# Ensure krew is in PATH
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+if ! command -v kubectl-krew &>/dev/null; then
+  echo "⚠️  krew not found, skipping plugin installation"
+  exit 0
+fi
+
+# Install oidc-login plugin
+if ! kubectl krew list | grep -q "oidc-login"; then
+  echo "Installing oidc-login plugin..."
+  kubectl krew install oidc-login
+  echo "✅ oidc-login installed"
+else
+  echo "✅ oidc-login already installed"
+fi
+
+echo "✅ Krew plugins configured!"
+{{ else -}}
+echo "⚠️  Krew plugin setup is macOS-only"
+exit 0
+{{ end -}}
+

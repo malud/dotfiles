@@ -1,0 +1,15 @@
+# Homebrew setup (must be before sourcing .bashrc)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -f /etc/os-release ]]; then
+  if grep -E "^(ID|NAME)=" /etc/os-release | grep -q "ubuntu"; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  fi
+fi
+
+# XDG Base Directory
+export XDG_CONFIG_HOME="$HOME/.config"
+
+# Source bashrc
+[ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc"
+

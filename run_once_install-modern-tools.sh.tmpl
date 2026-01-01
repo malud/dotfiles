@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+{{ if ne .chezmoi.os "darwin" -}}
+set -euo pipefail
+
+echo "📦 Installing modern CLI tools for bash..."
+
+# Detect package manager
+if command -v apt-get &>/dev/null; then
+  PKG_MGR="apt"
+elif command -v dnf &>/dev/null; then
+  PKG_MGR="dnf"
+elif command -v yum &>/dev/null; then
+  PKG_MGR="yum"
+elif command -v apk &>/dev/null; then
+  PKG_MGR="apk"
+else
+  echo "⚠️  No supported package manager found"
+  PKG_MGR="none"
+fi
+
+install_with_cargo() {
+  if ! command -v cargo &>/dev/null; then
+    echo "📦 Installing Rust (needed for modern tools)..."
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    source "$HOME/.cargo/env"
+  fi
+
+  echo "📦 Installing via cargo..."
+  cargo install "$@"
+}
+
+# Install tools based on package manager
+case "$PKG_MGR" in
+  apt)
+    echo "📦 Using apt-get..."
+    sudo apt-get update
+
+    # bat (often packaged as batcat)
+    if ! command -v bat &>/dev/null && ! command -v batcat &>/dev/null; then
+      sudo apt-get install -y bat
+      # Create symlink if installed as batcat
+      if command -v batcat &>/dev/null && ! command -v bat &>/dev/null; then
+        mkdir -p "$HOME/.local/bin"
+        ln -sf "$(which batcat)" "$HOME/.local/bin/bat"
+      fi
+    fi
+
+    # fd (often packaged as fd-find)
+    if ! command -v fd &>/dev/null && ! command -v fdfind &>/dev/null; then
+      sudo apt-get install -y fd-find
+      # Create symlink if installed as fdfind
+      if command -v fdfind &>/dev/null && ! command -v fd &>/dev/null; then
+        mkdir -p "$HOME/.local/bin"
+        ln -sf "$(which fdfind)" "$HOME/.local/bin/fd"
+      fi
+    fi
+
+    # ripgrep
+    command -v rg &>/dev/null || sudo apt-get install -y ripgrep
+
+    # fzf
+    command -v fzf &>/dev/null || sudo apt-get install -y fzf
+
+    # eza and zoxide not in apt, install via cargo
+    command -v eza &>/dev/null || install_with_cargo eza
+    command -v zoxide &>/dev/null || install_with_cargo zoxide
+    ;;
+
+  dnf|yum)
+    echo "📦 Using $PKG_MGR..."
+
+    command -v bat &>/dev/null || sudo "$PKG_MGR" install -y bat
+    command -v fd &>/dev/null || sudo "$PKG_MGR" install -y fd-find
+    command -v rg &>/dev/null || sudo "$PKG_MGR" install -y ripgrep
+    command -v fzf &>/dev/null || sudo "$PKG_MGR" install -y fzf
+
+    # eza and zoxide not in dnf/yum, install via cargo
+    command -v eza &>/dev/null || install_with_cargo eza
+    command -v zoxide &>/dev/null || install_with_cargo zoxide
+    ;;
+
+  apk)
+    echo "📦 Using apk (Alpine)..."
+
+    command -v bat &>/dev/null || sudo apk add bat
+    command -v fd &>/dev/null || sudo apk add fd
+    command -v rg &>/dev/null || sudo apk add ripgrep
+    command -v fzf &>/dev/null || sudo apk add fzf
+
+    # eza and zoxide not in apk, install via cargo
+    command -v eza &>/dev/null || install_with_cargo eza
+    command -v zoxide &>/dev/null || install_with_cargo zoxide
+    ;;
+
+  none)
+    echo "📦 Installing all tools via cargo..."
+    install_with_cargo bat fd-find ripgrep eza zoxide
+
+    # fzf via git
+    if ! command -v fzf &>/dev/null; then
+      git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+      ~/.fzf/install --bin
+    fi
+    ;;
+esac
+
+echo ""
+echo "✅ Modern CLI tools installed!"
+echo ""
+echo "Tools available:"
+command -v eza &>/dev/null && echo "  ✓ eza (better ls)"
+command -v bat &>/dev/null && echo "  ✓ bat (better cat)"
+command -v fd &>/dev/null && echo "  ✓ fd (better find)"
+command -v rg &>/dev/null && echo "  ✓ rg (better grep)"
+command -v fzf &>/dev/null && echo "  ✓ fzf (fuzzy finder)"
+command -v zoxide &>/dev/null && echo "  ✓ zoxide (smarter cd)"
+
+{{ else -}}
+echo "⚠️  This script is for non-macOS systems only"
+echo "ℹ️  On macOS, use Homebrew: brew bundle"
+exit 0
+{{ end -}}
+

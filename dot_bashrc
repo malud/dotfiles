@@ -1,0 +1,186 @@
+# Ghostty shell integration
+if [ -n "${GHOSTTY_RESOURCES_DIR}" ]; then
+  builtin source "${GHOSTTY_RESOURCES_DIR}/shell-integration/bash/ghostty.bash"
+fi
+
+# Environment
+export EDITOR=nvim
+export VISUAL="$EDITOR"
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+# XDG Base Directory
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$HOME/.cache"
+
+# Go
+export GOPATH="$HOME/go"
+
+# History configuration
+export HISTSIZE=50000
+export HISTFILESIZE=100000
+export HISTCONTROL=ignoreboth:erasedups
+export HISTTIMEFORMAT="%F %T "
+shopt -s histappend
+shopt -s cmdhist
+
+# Shell options
+shopt -s checkwinsize
+shopt -s globstar 2>/dev/null
+shopt -s nocaseglob
+shopt -s cdspell 2>/dev/null
+shopt -s dirspell 2>/dev/null
+
+# Homebrew (macOS)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  if [ -f /opt/homebrew/bin/brew ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  fi
+fi
+
+# Bash completion
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  [[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]] && . "/opt/homebrew/etc/profile.d/bash_completion.sh"
+elif ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
+
+# Additional PATH configurations
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  export PATH="$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH"
+fi
+export PATH="$GOPATH/bin:$PATH"
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+export PATH="$HOME/.lmstudio/bin:$PATH"
+
+# 1Password SSH agent (macOS)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  export SSH_AUTH_SOCK=~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock
+fi
+
+# Aliases
+alias v='nvim'
+alias vim='nvim'
+alias vi='nvim'
+alias ls='ls --color=auto 2>/dev/null || ls -G'
+alias ll='ls -alFh'
+alias la='ls -A'
+alias l='ls -CF'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias mkdir='mkdir -pv'
+alias df='df -h'
+alias du='du -h'
+alias free='free -h 2>/dev/null'
+
+# Git aliases
+alias g='git'
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git pull'
+alias gd='git diff'
+alias gco='git checkout'
+alias gb='git branch'
+alias glog='git log --oneline --graph --decorate'
+
+# Modern replacements (if available)
+command -v bat &>/dev/null && alias cat='bat'
+command -v eza &>/dev/null && alias ls='eza' && alias ll='eza -alh' && alias la='eza -a'
+command -v fd &>/dev/null && alias find='fd'
+command -v rg &>/dev/null && alias grep='rg'
+
+# Functions
+mkcd() {
+  mkdir -p "$1" && cd "$1"
+}
+
+extract() {
+  if [ -f "$1" ]; then
+    case "$1" in
+      *.tar.bz2)   tar xjf "$1"     ;;
+      *.tar.gz)    tar xzf "$1"     ;;
+      *.bz2)       bunzip2 "$1"     ;;
+      *.rar)       unrar x "$1"     ;;
+      *.gz)        gunzip "$1"      ;;
+      *.tar)       tar xf "$1"      ;;
+      *.tbz2)      tar xjf "$1"     ;;
+      *.tgz)       tar xzf "$1"     ;;
+      *.zip)       unzip "$1"       ;;
+      *.Z)         uncompress "$1"  ;;
+      *.7z)        7z x "$1"        ;;
+      *)           echo "'$1' cannot be extracted via extract()" ;;
+    esac
+  else
+    echo "'$1' is not a valid file"
+  fi
+}
+
+git_prune_local() {
+  git fetch -p
+  branches=$(git branch -vv | grep ": gone]" | awk '{print $1}')
+
+  if [[ -z "$branches" ]]; then
+    echo "No branches to prune."
+    return
+  fi
+
+  echo "Branches to delete:"
+  echo "$branches" | sed 's/^/  - /'
+  echo ""
+
+  read -p "Delete all of these? [y/N] " ans
+  if [[ "$ans" == "y" || "$ans" == "Y" ]]; then
+    echo "$branches" | xargs -r git branch -d
+  else
+    echo "Aborted."
+  fi
+}
+alias git-prune-local=git_prune_local
+
+# Zoxide (smarter cd)
+if command -v zoxide &>/dev/null; then
+  eval "$(zoxide init bash)"
+fi
+
+# FZF key bindings and fuzzy completion
+if command -v fzf &>/dev/null; then
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    [[ -f /opt/homebrew/opt/fzf/shell/key-bindings.bash ]] && source /opt/homebrew/opt/fzf/shell/key-bindings.bash
+    [[ -f /opt/homebrew/opt/fzf/shell/completion.bash ]] && source /opt/homebrew/opt/fzf/shell/completion.bash
+  else
+    [[ -f /usr/share/doc/fzf/examples/key-bindings.bash ]] && source /usr/share/doc/fzf/examples/key-bindings.bash
+    [[ -f /usr/share/doc/fzf/examples/completion.bash ]] && source /usr/share/doc/fzf/examples/completion.bash
+  fi
+  export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8,fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc,marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
+fi
+
+# Python with uv (modern package and project manager)
+if command -v uv &>/dev/null; then
+  alias pip='uv pip'
+  alias venv='uv venv'
+  alias python-install='uv python install'
+  alias python-list='uv python list'
+  export UV_PYTHON_PREFERENCE=only-managed
+fi
+
+# Starship prompt
+if command -v starship &>/dev/null; then
+  export STARSHIP_CONFIG="$XDG_CONFIG_HOME/starship.toml"
+  export STARSHIP_CACHE="$XDG_CACHE_HOME/starship"
+  eval "$(starship init bash)"
+fi
+
+# Local customizations
+[ -f "$HOME/.bashrc.local" ] && source "$HOME/.bashrc.local"
+

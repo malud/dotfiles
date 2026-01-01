@@ -1,0 +1,40 @@
+# Example .bashrc.local
+
+# This file is sourced by .bashrc and is meant for local customizations
+# that should not be synced across machines.
+
+# Add to PATH
+# export PATH="$HOME/bin:$PATH"
+
+# Project-specific aliases
+# alias work='cd ~/work/current-project'
+
+# Local environment variables
+# export JAVA_HOME=/usr/local/opt/openjdk@11
+
+# FZF integration
+if [ -f ~/.fzf.bash ]; then
+  source ~/.fzf.bash
+  export FZF_DEFAULT_OPTS="
+    --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8
+    --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc
+    --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
+fi
+
+# Zoxide (smarter cd)
+if command -v zoxide &>/dev/null; then
+  eval "$(zoxide init bash)"
+fi
+
+# Python with uv (modern package and project manager)
+if command -v uv &>/dev/null; then
+  alias pip='uv pip'
+  alias venv='uv venv'
+  alias python-install='uv python install'
+  alias python-list='uv python list'
+  export UV_PYTHON_PREFERENCE=only-managed
+fi
+
+# Rust cargo
+# [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+
