@@ -1,59 +1,69 @@
 [user]
-	name = {{ .name }}
-	email = {{ .email }}
+ name = {{ .name }}
+ email = {{ .email }}
 
 [core]
-	editor = vim
-	autocrlf = input
-	excludesfile = ~/.gitignore_global
+ editor = vim
+ autocrlf = input
+ excludesfile = ~/.gitignore_global
 
 [init]
-	defaultBranch = main
+ defaultBranch = main
+
+[commit]
+ gpgsign = true
+
+[gpg]
+ format = ssh
+
+[gpg "ssh"]
+ defaultKeyCommand = ssh-add -L
 
 [pull]
-	rebase = false
+ rebase = true
 
 [push]
-	default = simple
-	followTags = true
+ default = simple
+ followTags = true
 
 [fetch]
-	prune = true
+ prune = true
 
 [diff]
-	colorMoved = zebra
+ colorMoved = default
 
 [merge]
-	conflictstyle = diff3
+ conflictstyle = diff3
 
 [color]
-	ui = auto
+ ui = auto
 
 [color "branch"]
-	current = yellow reverse
-	local = yellow
-	remote = green
+ current = "#f5c2e7 reverse"
+ local = "#f9e2af"
+ remote = "#a6e3a1"
 
 [color "diff"]
-	meta = yellow bold
-	frag = magenta bold
-	old = red bold
-	new = green bold
+ meta = "#cdd6f4"
+ frag = "#f5c2e7 bold"
+ old = "#f38ba8 bold"
+ new = "#a6e3a1 bold"
+ oldMoved = "#eba0ac"
+ newMoved = "#94e2d5"
 
 [color "status"]
-	added = green
-	changed = yellow
-	untracked = cyan
+ added = "#a6e3a1"
+ changed = "#f9e2af"
+ untracked = "#89dceb"
 
 [alias]
-	st = status
-	co = checkout
-	br = branch
-	ci = commit
-	unstage = reset HEAD --
-	last = log -1 HEAD
-	visual = log --graph --oneline --decorate --all
-	amend = commit --amend --no-edit
-	please = push --force-with-lease
-	stash-all = stash save --include-untracked
-
+ st = status
+ co = checkout
+ br = branch
+ ci = commit
+ unstage = reset HEAD --
+ last = log -1 HEAD
+ visual = log --graph --oneline --decorate --all
+ amend = commit --amend --no-edit
+ please = push --force-with-lease
+ stash-all = stash save --include-untracked

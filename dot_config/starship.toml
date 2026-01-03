@@ -55,49 +55,42 @@ style = "bg:surface0 fg:text"
 format = "[ $symbol ]($style)"
 
 [os.symbols]
-Alpaquita = " "
-Alpine = " "
-AlmaLinux = " "
-Amazon = " "
-Android = " "
-Arch = " "
-Artix = " "
-CentOS = " "
-Debian = " "
-DragonFly = " "
-Emscripten = " "
-EndeavourOS = " "
-Fedora = " "
-FreeBSD = " "
-Garuda = "󰛓 "
-Gentoo = " "
-HardenedBSD = "󰞌 "
-Illumos = "󰈸 "
-Kali = " "
+Alpine = ""
+AlmaLinux = ""
+Amazon = ""
+Android = ""
+Arch = ""
+Artix = ""
+CentOS = ""
+Debian = ""
+EndeavourOS = ""
+Fedora = ""
+FreeBSD = ""
+Garuda = ""
+Gentoo = ""
+HardenedBSD = ""
+Illumos = ""
+Kali = ""
 Linux = ""
-Mabox = " "
 Macos = ""
-Manjaro = " "
-Mariner = " "
-MidnightBSD = " "
-Mint = " "
-NetBSD = " "
-NixOS = " "
+Manjaro = ""
+Mint = "󰣭"
+NixOS = ""
 OpenBSD = "󰈺 "
-openSUSE = " "
-OracleLinux = "󰌷 "
-Pop = " "
+openSUSE = ""
+OracleLinux = ""
+Pop = ""
 Raspbian = ""
-Redhat = " "
-RedHatEnterprise = " "
-RockyLinux = " "
-Redox = "󰀘 "
-Solus = "󰠳 "
-SUSE = " "
-Ubuntu = " "
-Unknown = " "
-Void = " "
-Windows = "󰍲 "
+Redhat = "󰮤"
+RedHatEnterprise = "󰮤"
+RockyLinux = ""
+Redox = "󰀘"
+Solus = "󰠳"
+SUSE = ""
+Ubuntu = ""
+Unknown = ""
+Void = ""
+Windows = "󰍲"
 
 [username]
 show_always = true
@@ -112,15 +105,18 @@ truncation_length = 3
 truncation_symbol = "…/"
 
 [directory.substitutions]
-"Documents" = "󰈙 "
-"Downloads" = "󰩭 "
-"Desktop" = "󰉩 "
-"Music" = "󰎆 "
-"Pictures" = "󰉄 "
-"Projects" = "󰏖 "
+"Documents" = "󱔗"
+"Downloads" = ""
+"Desktop" = "󰧨"
+"Music" = "󰎆"
+"Pictures" = ""
+"Projects" = ""
+
+[git_commit]
+tag_symbol = ""
 
 [git_branch]
-symbol = ""
+symbol = ""
 style = "bg:green"
 format = '[[ $symbol $branch ](fg:base bg:green)]($style)'
 
@@ -140,27 +136,27 @@ renamed = "➜ ${count}"
 deleted = " ${count}"
 
 [nodejs]
-symbol = " "
+symbol = ""
 style = "bg:teal"
 format = '[[ $symbol ($version) ](fg:base bg:teal)]($style)'
 
 [rust]
-symbol = "󱘗 "
+symbol = "󱘗"
 style = "bg:teal"
 format = '[[ $symbol ($version) ](fg:base bg:teal)]($style)'
 
 [golang]
-symbol = " "
+symbol = ""
 style = "bg:teal"
 format = '[[ $symbol ($version) ](fg:base bg:teal)]($style)'
 
 [python]
-symbol = " "
+symbol = "󰌠"
 style = "bg:teal"
 format = '[[ $symbol ($version) ](fg:base bg:teal)]($style)'
 
 [docker_context]
-symbol = " "
+symbol = "󰡨"
 style = "bg:teal"
 format = '[[ $symbol $context ](fg:base bg:teal)]($style)'
 
@@ -182,82 +178,55 @@ error_symbol = '[✗](bold red)'
 symbol = ""
 
 [buf]
-symbol = " "
+symbol = ""
 
 [c]
-symbol = " "
-
-[conda]
-symbol = " "
-
-[crystal]
-symbol = " "
-
-[dart]
-symbol = " "
-
-[elixir]
-symbol = " "
-
-[elm]
-symbol = " "
-
-[fennel]
-symbol = " "
-
-[fossil_branch]
-symbol = " "
-
-[git_commit]
-tag_symbol = '  '
+symbol = ""
 
 [gradle]
-symbol = " "
+symbol = ""
 
 [guix_shell]
-symbol = " "
+symbol = ""
 
 [haskell]
-symbol = " "
+symbol = ""
 
 [haxe]
-symbol = " "
-
-[hg_branch]
-symbol = " "
+symbol = ""
 
 [hostname]
-ssh_symbol = " "
+ssh_symbol = "󰣀"
 
 [java]
-symbol = " "
+symbol = ""
 
 [julia]
-symbol = " "
+symbol = ""
 
 [kotlin]
-symbol = " "
+symbol = ""
 
 [kubernetes]
-symbol = "󱃾 "
+symbol = ""
 
 [lua]
-symbol = " "
+symbol = ""
 
 [memory_usage]
-symbol = "󰍛 "
+symbol = "󰍛"
 
 [meson]
-symbol = "󰔷 "
+symbol = "󰔷"
 
 [nim]
-symbol = "󰆥 "
+symbol = ""
 
 [nix_shell]
-symbol = " "
+symbol = ""
 
 [package]
-symbol = "󰏗 "
+symbol = ""
 
 [rlang]
-symbol = "󰟔 "
+symbol = "󰟔"
