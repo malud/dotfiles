@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Install devpod docker provider
+
+set -e
+
+if ! command -v devpod &>/dev/null; then
+  echo "devpod not found, skipping provider installation"
+  exit 0
+fi
+
+# Check if docker provider is already installed
+if devpod provider list | grep -q "docker"; then
+  echo "devpod docker provider already installed, skipping"
+  exit 0
+fi
+
+echo "Adding devpod docker provider..."
+devpod provider add https://raw.githubusercontent.com/loft-sh/devpod/refs/heads/main/providers/docker/provider.yaml
+
+echo "✓ devpod docker provider installed"

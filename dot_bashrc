@@ -184,3 +184,7 @@ fi
 # Local customizations
 [ -f "$HOME/.bashrc.local" ] && source "$HOME/.bashrc.local"
 
+# devpod auto completion
+if command -v devpod &>/dev/null; then
+  eval "$(devpod completion bash)"
+fi
