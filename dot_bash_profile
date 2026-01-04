@@ -1,9 +1,9 @@
-# Homebrew setup (must be before sourcing .bashrc)
+# Homebrew setup (macOS only)
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-elif [[ -f /etc/os-release ]]; then
-  if grep -E "^(ID|NAME)=" /etc/os-release | grep -q "ubuntu"; then
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  if [ -f /opt/homebrew/bin/brew ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [ -f /usr/local/bin/brew ]; then
+    eval "$(/usr/local/bin/brew shellenv)"
   fi
 fi
 

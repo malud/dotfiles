@@ -1,34 +1,31 @@
 #!/usr/bin/env bash
+{{ if eq .chezmoi.os "darwin" -}}
 set -euo pipefail
 
+echo "📦 Installing Brewfile packages..."
+
 # Detect Homebrew location and ensure it's in PATH
-BREW_PATH=""
 if [ -f /opt/homebrew/bin/brew ]; then
-  BREW_PATH="/opt/homebrew/bin/brew"
   eval "$(/opt/homebrew/bin/brew shellenv)"
+  BREW_PATH="/opt/homebrew/bin/brew"
 elif [ -f /usr/local/bin/brew ]; then
-  BREW_PATH="/usr/local/bin/brew"
   eval "$(/usr/local/bin/brew shellenv)"
-elif [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
-  BREW_PATH="/home/linuxbrew/.linuxbrew/bin/brew"
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-fi
-
-# Check if Homebrew is available
-if [ -n "$BREW_PATH" ]; then
-  echo "📦 Installing Brewfile packages via Homebrew..."
-  echo "ℹ️  Using brew at: $BREW_PATH"
-
-  brew bundle --file="${HOME}/.Brewfile"
-
-  echo "✅ Homebrew packages installed!"
+  BREW_PATH="/usr/local/bin/brew"
 else
-{{ if eq .chezmoi.os "darwin" -}}
-  echo "⚠️  Homebrew not found on macOS - please install it first"
+  echo "❌ Homebrew not found. Please install it first:"
+  echo "   /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
   exit 1
-{{ else -}}
-  echo "ℹ️  Homebrew not found - will use native package managers"
-  exit 0
-{{ end -}}
 fi
+
+echo "ℹ️  Using brew at: $BREW_PATH"
+
+brew bundle --file="${HOME}/.Brewfile"
+
+echo "✅ Homebrew packages installed!"
+
+{{ else -}}
+echo "ℹ️  This script is for macOS only"
+echo "ℹ️  Linux packages are installed via run_once_install-modern-tools.sh.tmpl"
+exit 0
+{{ end -}}
 

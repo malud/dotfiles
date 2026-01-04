@@ -2,15 +2,7 @@
 {{ if ne .chezmoi.os "darwin" -}}
 set -euo pipefail
 
-# If Homebrew is available on Linux, skip this script (use Brewfile instead)
-if [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
-  echo "ℹ️  Homebrew detected at /home/linuxbrew/.linuxbrew/bin/brew"
-  echo "ℹ️  Tools will be installed via Brewfile - skipping native package manager installation"
-  exit 0
-fi
-
-echo "📦 Installing modern CLI tools for bash..."
-echo "ℹ️  Homebrew not found - using native package managers"
+echo "📦 Installing modern CLI tools for Linux..."
 
 # Detect package manager
 if command -v apt-get &>/dev/null; then
@@ -24,6 +16,12 @@ elif command -v apk &>/dev/null; then
 else
   echo "⚠️  No supported package manager found"
   PKG_MGR="none"
+fi
+
+# Determine if we need sudo
+USE_SUDO=false
+if [ "$(id -u)" -ne 0 ] && command -v sudo &>/dev/null; then
+  USE_SUDO=true
 fi
 
 install_with_cargo() {
@@ -41,11 +39,19 @@ install_with_cargo() {
 case "$PKG_MGR" in
   apt)
     echo "📦 Using apt-get..."
-    sudo apt-get update
+    if [ "$USE_SUDO" = true ]; then
+      sudo apt-get update
+    else
+      apt-get update
+    fi
 
     # bat (often packaged as batcat)
     if ! command -v bat &>/dev/null && ! command -v batcat &>/dev/null; then
-      sudo apt-get install -y bat
+      if [ "$USE_SUDO" = true ]; then
+        sudo apt-get install -y bat
+      else
+        apt-get install -y bat
+      fi
       # Create symlink if installed as batcat
       if command -v batcat &>/dev/null && ! command -v bat &>/dev/null; then
         mkdir -p "$HOME/.local/bin"
@@ -55,7 +61,11 @@ case "$PKG_MGR" in
 
     # fd (often packaged as fd-find)
     if ! command -v fd &>/dev/null && ! command -v fdfind &>/dev/null; then
-      sudo apt-get install -y fd-find
+      if [ "$USE_SUDO" = true ]; then
+        sudo apt-get install -y fd-find
+      else
+        apt-get install -y fd-find
+      fi
       # Create symlink if installed as fdfind
       if command -v fdfind &>/dev/null && ! command -v fd &>/dev/null; then
         mkdir -p "$HOME/.local/bin"
@@ -64,10 +74,88 @@ case "$PKG_MGR" in
     fi
 
     # ripgrep
-    command -v rg &>/dev/null || sudo apt-get install -y ripgrep
+    if ! command -v rg &>/dev/null; then
+      if [ "$USE_SUDO" = true ]; then
+        sudo apt-get install -y ripgrep
+      else
+        apt-get install -y ripgrep
+      fi
+    fi
 
     # fzf
-    command -v fzf &>/dev/null || sudo apt-get install -y fzf
+    if ! command -v fzf &>/dev/null; then
+      if [ "$USE_SUDO" = true ]; then
+        sudo apt-get install -y fzf
+      else
+        apt-get install -y fzf
+      fi
+    fi
+
+    # Essential development tools
+    if ! command -v nvim &>/dev/null; then
+      if [ "$USE_SUDO" = true ]; then
+        sudo apt-get install -y neovim
+      else
+        apt-get install -y neovim
+      fi
+    fi
+
+    if ! command -v tmux &>/dev/null; then
+      if [ "$USE_SUDO" = true ]; then
+        sudo apt-get install -y tmux
+      else
+        apt-get install -y tmux
+      fi
+    fi
+
+    if ! command -v git &>/dev/null; then
+      if [ "$USE_SUDO" = true ]; then
+        sudo apt-get install -y git
+      else
+        apt-get install -y git
+      fi
+    fi
+
+    if ! command -v jq &>/dev/null; then
+      if [ "$USE_SUDO" = true ]; then
+        sudo apt-get install -y jq
+      else
+        apt-get install -y jq
+      fi
+    fi
+
+    # yq (Go version - better than Python version)
+    if ! command -v yq &>/dev/null; then
+      echo "📦 Installing yq..."
+      YQ_VERSION="v4.44.1"
+      YQ_BINARY="yq_linux_amd64"
+      curl -sL "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}" -o "$HOME/.local/bin/yq"
+      chmod +x "$HOME/.local/bin/yq"
+    fi
+
+    # kubectl (if not already installed)
+    if ! command -v kubectl &>/dev/null; then
+      echo "📦 Installing kubectl..."
+      curl -sLO "https://dl.k8s.io/release/$(curl -sL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      chmod +x kubectl
+      mv kubectl "$HOME/.local/bin/"
+    fi
+
+    # helm
+    if ! command -v helm &>/dev/null; then
+      echo "📦 Installing helm..."
+      curl -sL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+    fi
+
+    # k9s
+    if ! command -v k9s &>/dev/null; then
+      echo "📦 Installing k9s..."
+      K9S_VERSION="v0.32.5"
+      curl -sL "https://github.com/derailed/k9s/releases/download/${K9S_VERSION}/k9s_Linux_amd64.tar.gz" -o /tmp/k9s.tar.gz
+      tar -xzf /tmp/k9s.tar.gz -C /tmp
+      mv /tmp/k9s "$HOME/.local/bin/"
+      rm /tmp/k9s.tar.gz
+    fi
 
     # eza and zoxide not in apt, install via cargo
     command -v eza &>/dev/null || install_with_cargo eza
@@ -77,10 +165,17 @@ case "$PKG_MGR" in
   dnf|yum)
     echo "📦 Using $PKG_MGR..."
 
-    command -v bat &>/dev/null || sudo "$PKG_MGR" install -y bat
-    command -v fd &>/dev/null || sudo "$PKG_MGR" install -y fd-find
-    command -v rg &>/dev/null || sudo "$PKG_MGR" install -y ripgrep
-    command -v fzf &>/dev/null || sudo "$PKG_MGR" install -y fzf
+    if [ "$USE_SUDO" = true ]; then
+      command -v bat &>/dev/null || sudo "$PKG_MGR" install -y bat
+      command -v fd &>/dev/null || sudo "$PKG_MGR" install -y fd-find
+      command -v rg &>/dev/null || sudo "$PKG_MGR" install -y ripgrep
+      command -v fzf &>/dev/null || sudo "$PKG_MGR" install -y fzf
+    else
+      command -v bat &>/dev/null || "$PKG_MGR" install -y bat
+      command -v fd &>/dev/null || "$PKG_MGR" install -y fd-find
+      command -v rg &>/dev/null || "$PKG_MGR" install -y ripgrep
+      command -v fzf &>/dev/null || "$PKG_MGR" install -y fzf
+    fi
 
     # eza and zoxide not in dnf/yum, install via cargo
     command -v eza &>/dev/null || install_with_cargo eza
@@ -90,10 +185,17 @@ case "$PKG_MGR" in
   apk)
     echo "📦 Using apk (Alpine)..."
 
-    command -v bat &>/dev/null || sudo apk add bat
-    command -v fd &>/dev/null || sudo apk add fd
-    command -v rg &>/dev/null || sudo apk add ripgrep
-    command -v fzf &>/dev/null || sudo apk add fzf
+    if [ "$USE_SUDO" = true ]; then
+      command -v bat &>/dev/null || sudo apk add bat
+      command -v fd &>/dev/null || sudo apk add fd
+      command -v rg &>/dev/null || sudo apk add ripgrep
+      command -v fzf &>/dev/null || sudo apk add fzf
+    else
+      command -v bat &>/dev/null || apk add bat
+      command -v fd &>/dev/null || apk add fd
+      command -v rg &>/dev/null || apk add ripgrep
+      command -v fzf &>/dev/null || apk add fzf
+    fi
 
     # eza and zoxide not in apk, install via cargo
     command -v eza &>/dev/null || install_with_cargo eza
@@ -112,6 +214,12 @@ case "$PKG_MGR" in
     ;;
 esac
 
+# Install starship (common to all platforms)
+if ! command -v starship &>/dev/null; then
+  echo "📦 Installing starship..."
+  curl -sS https://starship.rs/install.sh | sh -s -- -y
+fi
+
 echo ""
 echo "✅ Modern CLI tools installed!"
 echo ""
@@ -123,10 +231,20 @@ command -v rg &>/dev/null && echo "  ✓ rg (better grep)"
 command -v fzf &>/dev/null && echo "  ✓ fzf (fuzzy finder)"
 command -v zoxide &>/dev/null && echo "  ✓ zoxide (smarter cd)"
 command -v starship &>/dev/null && echo "  ✓ starship (prompt)"
+command -v nvim &>/dev/null && echo "  ✓ neovim (editor)"
+command -v tmux &>/dev/null && echo "  ✓ tmux (terminal multiplexer)"
+command -v git &>/dev/null && echo "  ✓ git (version control)"
+command -v jq &>/dev/null && echo "  ✓ jq (JSON processor)"
+command -v yq &>/dev/null && echo "  ✓ yq (YAML processor)"
+command -v kubectl &>/dev/null && echo "  ✓ kubectl (kubernetes CLI)"
+command -v kustomize &>/dev/null && echo "  ✓ kustomize (kubernetes config management)"
+command -v k9s &>/dev/null && echo "  ✓ k9s (kubernetes TUI)"
+echo ""
+echo "ℹ️  Note: Nerd Font icons are rendered by your local terminal/VSCode"
+echo "   Ensure 'SauceCodePro Nerd Font' is installed on your host system (macOS)"
 
 {{ else -}}
 echo "⚠️  This script is for non-macOS systems only"
 echo "ℹ️  On macOS, use Homebrew: brew bundle"
 exit 0
 {{ end -}}
-

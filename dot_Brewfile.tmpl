@@ -1,111 +1,83 @@
 {{ if eq .chezmoi.os "darwin" -}}
-{{ end -}}
-cask "font-sauce-code-pro-nerd-font"
+# Homebrew packages for macOS
+# Note: Linux uses native package managers (see run_once_install-modern-tools.sh.tmpl)
+
 # Fonts
+cask "font-sauce-code-pro-nerd-font"
 
-cask "proton-mail"
-cask "clickhouse"
-cask "devpod"
-cask "docker-desktop"
-cask "ghostty"
-cask "openvpn-connect"
-cask "ngrok"
 # Applications
+cask "ghostty"
+cask "docker-desktop"
+cask "devpod"
+cask "proton-mail"
+cask "openvpn-connect"
+cask "clickhouse"
+cask "ngrok"
+cask "jetbrains-gateway"
 
-brew "hugo"
-brew "libvterm"
-brew "luv"
-brew "luajit"
-brew "lpeg"
-brew "oniguruma"
-brew "mpdecimal"
-brew "pycparser"
-brew "cryptography"
-brew "cffi"
-brew "abseil"
-brew "protobuf-c"
-brew "protobuf"
-brew "msgpack"
-brew "json-c"
-brew "jansson"
-brew "gmp"
-brew "icu4c@76"
-brew "unibilium"
-brew "utf8proc"
-brew "ncurses"
-brew "libunistring"
-brew "libmagic"
-brew "libsodium"
-brew "libyaml"
-brew "libuv"
-brew "libnghttp2"
-brew "libevent"
-brew "c-ares"
-brew "brotli"
-brew "xz"
-brew "sqlite"
-brew "readline"
-brew "pcre2"
-brew "ca-certificates"
-brew "openssl@3"
-brew "gettext"
-brew "pkgconf"
-brew "m4"
-brew "libtool"
-brew "automake"
-brew "autoconf"
-# System Libraries
-
-brew "yara"
-brew "bore-cli"
-brew "clamav"
-# Security & Networking
-
-brew "openfga"
-brew "nats-server"
-# Databases & Services
-
-brew "docker"
-brew "krew"
-brew "k9s"
-brew "kustomize"
-brew "helm"
-brew "kubernetes-cli"
-brew "terraform"
-brew "azure-cli"
-brew "awscli"
-# Cloud & DevOps
-
-brew "python@3.13"
-brew "python@3.12"
-brew "mypy"
-brew "ruff"
-brew "uv"
-brew "go"
-brew "neovim"
-# Development Tools
-
-brew "z"
-brew "yazi"
-brew "fastfetch"
-brew "fga"
-brew "just"
-brew "yq"
-brew "jq"
-brew "stow"
-brew "git"
-brew "coreutils"
+# Modern CLI Tools
 brew "eza"
 brew "bat"
 brew "fd"
 brew "ripgrep"
 brew "zoxide"
-# Modern CLI Tools
-
-brew "tree-sitter"
-brew "tmux"
 brew "fzf"
 brew "starship"
-brew "bash-completion"
-brew "bash"
+
 # Shell & Terminal
+brew "bash"
+brew "bash-completion"
+brew "tmux"
+brew "git"
+brew "coreutils"
+brew "stow"
+brew "z"
+
+# Development Tools
+brew "go"
+brew "python@3.13"
+brew "python@3.12"
+brew "uv"
+brew "ruff"
+brew "mypy"
+brew "neovim"
+brew "just"
+brew "jq"
+brew "yq"
+brew "tree-sitter"
+
+# Cloud & DevOps
+brew "kubernetes-cli"
+brew "krew"
+brew "k9s"
+brew "kustomize"
+brew "terraform"
+brew "azure-cli"
+brew "awscli"
+brew "docker"
+
+# Utilities
+brew "yazi"
+brew "fastfetch"
+brew "fga"
+brew "hugo"
+
+# Databases & Services
+brew "openfga"
+brew "nats-server"
+brew "clamav"
+
+# Security & Networking
+brew "yara"
+brew "bore-cli"
+
+# System Libraries (dependencies for neovim, etc.)
+brew "libvterm"
+brew "luv"
+brew "luajit"
+brew "lpeg"
+brew "tree-sitter"
+{{ else -}}
+# This file is for macOS only
+# Linux uses native package managers - see run_once_install-modern-tools.sh.tmpl
+{{ end -}}

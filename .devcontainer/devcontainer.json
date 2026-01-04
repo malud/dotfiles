@@ -1,0 +1,12 @@
+{
+  "name": "dotfiles-dev",
+  "image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu",
+  "workspaceFolder": "/workspace",
+  "mounts": [
+    "source=devcontainer-home,target=/home/vscode,type=volume"
+  ],
+  "features": {
+    "ghcr.io/rio/features/chezmoi": {}
+  },
+  "remoteUser": "vscode"
+}

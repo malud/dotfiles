@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+{{ if ne .chezmoi.os "darwin" -}}
+
+# Configure VSCode Server to use Nerd Font
+VSCODE_SETTINGS_DIR="$HOME/.vscode-server/data/Machine"
+VSCODE_SETTINGS_FILE="$VSCODE_SETTINGS_DIR/settings.json"
+
+if [ -d "$HOME/.vscode-server" ]; then
+  echo "📝 Configuring VSCode terminal font..."
+
+  mkdir -p "$VSCODE_SETTINGS_DIR"
+
+  # Check if settings.json exists
+  if [ -f "$VSCODE_SETTINGS_FILE" ]; then
+    # Backup existing settings
+    cp "$VSCODE_SETTINGS_FILE" "$VSCODE_SETTINGS_FILE.backup"
+
+    # Use jq if available to merge settings, otherwise append
+    if command -v jq &>/dev/null; then
+      TEMP_FILE=$(mktemp)
+      jq '. + {
+        "terminal.integrated.fontFamily": "\"SauceCodePro Nerd Font\", \"Symbols Nerd Font Mono\", monospace",
+        "terminal.integrated.fontSize": 14
+      }' "$VSCODE_SETTINGS_FILE" > "$TEMP_FILE"
+      mv "$TEMP_FILE" "$VSCODE_SETTINGS_FILE"
+      echo "✅ VSCode terminal font configured (merged with existing settings)"
+    else
+      echo "⚠️  jq not found - please manually add font settings to VSCode"
+      echo "   Or run: code --install-extension ms-vscode-remote.remote-containers"
+    fi
+  else
+    # Create new settings file
+    cat > "$VSCODE_SETTINGS_FILE" << 'EOF'
+{
+  "terminal.integrated.fontFamily": "'SauceCodePro Nerd Font', 'Symbols Nerd Font Mono', monospace",
+  "terminal.integrated.fontSize": 14
+}
+EOF
+    echo "✅ VSCode terminal font configured"
+  fi
+
+  echo ""
+  echo "ℹ️  Please reload VSCode window for font changes to take effect:"
+  echo "   Press Ctrl+Shift+P (or Cmd+Shift+P) and run: Developer: Reload Window"
+else
+  echo "ℹ️  VSCode Server not detected - skipping font configuration"
+  echo "   After connecting via VSCode Remote, re-run: chezmoi apply"
+fi
+
+{{ else -}}
+echo "ℹ️  This script is for Linux/DevContainer only"
+exit 0
+{{ end -}}
+

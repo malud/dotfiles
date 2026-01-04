@@ -32,30 +32,26 @@ shopt -s nocaseglob
 shopt -s cdspell 2>/dev/null
 shopt -s dirspell 2>/dev/null
 
-# Homebrew
+# Homebrew (macOS only)
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  # macOS Homebrew
   if [ -f /opt/homebrew/bin/brew ]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
   elif [ -f /usr/local/bin/brew ]; then
     eval "$(/usr/local/bin/brew shellenv)"
   fi
-else
-  # Linux Homebrew (Linuxbrew)
-  if [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-  fi
 fi
 
 # Bash completion
-if command -v brew &>/dev/null; then
-  # Homebrew bash completion (both macOS and Linux)
-  BREW_PREFIX="$(brew --prefix)"
-  if [[ -r "${BREW_PREFIX}/etc/profile.d/bash_completion.sh" ]]; then
-    . "${BREW_PREFIX}/etc/profile.d/bash_completion.sh"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # Homebrew bash completion (macOS)
+  if command -v brew &>/dev/null; then
+    BREW_PREFIX="$(brew --prefix)"
+    if [[ -r "${BREW_PREFIX}/etc/profile.d/bash_completion.sh" ]]; then
+      . "${BREW_PREFIX}/etc/profile.d/bash_completion.sh"
+    fi
   fi
 elif ! shopt -oq posix; then
-  # System bash completion (Linux fallback)
+  # System bash completion (Linux)
   if [ -f /usr/share/bash-completion/bash_completion ]; then
     . /usr/share/bash-completion/bash_completion
   elif [ -f /etc/bash_completion ]; then
@@ -121,7 +117,15 @@ alias gb='git branch'
 alias glog='git log --oneline --graph --decorate'
 
 # Modern replacements (if available)
-command -v bat &>/dev/null && alias cat='bat'
+# bat aliases - syntax highlighted cat
+if command -v bat &>/dev/null; then
+  # cat replacement - no paging, just print with syntax highlighting
+  alias cat='bat --paging=never --style=plain'
+  # verbose mode - with line numbers and git changes
+  alias catt='bat --paging=never'
+  # pager mode - for reading long files
+  alias bcat='bat'
+fi
 command -v eza &>/dev/null && alias ls='eza' && alias ll='eza -alh' && alias la='eza -a'
 command -v fd &>/dev/null && alias find='fd'
 command -v rg &>/dev/null && alias grep='rg'
