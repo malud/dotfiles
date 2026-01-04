@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-{{ if eq .chezmoi.os "darwin" -}}
 set -euo pipefail
 
 echo "📦 Installing krew plugins..."
@@ -22,8 +21,4 @@ else
 fi
 
 echo "✅ Krew plugins configured!"
-{{ else -}}
-echo "⚠️  Krew plugin setup is macOS-only"
-exit 0
-{{ end -}}
 

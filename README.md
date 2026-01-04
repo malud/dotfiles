@@ -21,10 +21,28 @@ When combined with starship for prompts, you get 95% of zsh's visual appeal with
 # Install chezmoi
 sh -c "$(curl -fsLS get.chezmoi.io)"
 
-# Install starship
-curl -sS https://starship.rs/install.sh | sh
+# Initialize and apply dotfiles (everything else is automatic!)
+chezmoi init --apply https://github.com/malud/dotfiles.git
 
-# Initialize with this repo
+# Restart your shell
+exec bash
+```
+
+That's it! Homebrew, starship, and all packages install automatically.
+
+### What Gets Installed Automatically
+
+- **Homebrew** (both macOS and Linux) - installed non-interactively if not present
+- **All packages from Brewfile** - starship, eza, bat, fd, ripgrep, zoxide, fzf, and more
+- **kubectl krew plugins** - if kubectl is available
+- **devpod docker provider** - if devpod is available
+
+### Manual Preview (Optional)
+
+If you want to preview changes before applying:
+
+```bash
+# Initialize without applying
 chezmoi init https://github.com/malud/dotfiles.git
 
 # Preview changes
@@ -38,17 +56,22 @@ chezmoi apply -v
 
 ```
 ~/.local/share/chezmoi/
-├── .chezmoiignore                    # Conditional file exclusions
-├── .chezmoi.toml.tmpl                # User configuration template
-├── dot_bashrc                        # Main bash configuration
-├── dot_bash_profile                  # Bash login shell
-├── dot_inputrc                       # Readline configuration
-├── dot_gitconfig.tmpl                # Git configuration
-├── dot_Brewfile.tmpl                 # Homebrew packages (macOS only)
-├── run_once_install-packages.sh.tmpl # Auto-install brew packages (macOS)
-├── run_onchange_update-brew.sh.tmpl  # Auto-update brew on changes
+├── .chezmoiignore                              # Conditional file exclusions
+├── .chezmoi.toml.tmpl                          # User configuration template
+├── dot_bashrc                                  # Main bash configuration
+├── dot_bash_profile                            # Bash login shell
+├── dot_inputrc                                 # Readline configuration
+├── dot_gitconfig.tmpl                          # Git configuration
+├── dot_Brewfile.tmpl                           # Homebrew packages (cross-platform)
+├── run_once_before_install-homebrew.sh.tmpl    # Auto-install Homebrew (macOS)
+├── run_once_before_install-homebrew-linux.sh.tmpl  # Auto-install Homebrew (Linux)
+├── run_once_install-packages.sh.tmpl           # Install packages via Homebrew
+├── run_once_install-modern-tools.sh.tmpl       # Fallback: native package managers (Linux)
+├── run_once_after_install-krew-plugins.sh.tmpl # Install kubectl krew plugins
+├── run_once_after_install-devpod-provider.sh.tmpl  # Install devpod docker provider
+├── run_onchange_update-brew.sh.tmpl            # Auto-update brew on changes
 └── dot_config/
-    ├── starship.toml                 # Starship prompt (Catppuccin Mocha)
+    ├── starship.toml                           # Starship prompt (Catppuccin Mocha)
     ├── nvim/
     │   └── init.lua                  # Neovim config (Catppuccin Mocha)
     ├── ghostty/
@@ -66,24 +89,40 @@ chezmoi apply -v
 - **Starship** prompt with powerline glyphs
 - **Smart history** - Large history, deduplication, append mode
 - **Sensible defaults** - Minimal but functional
-- **Cross-platform** - Ghostty config only applied on macOS
-- **Homebrew automation** - Auto-install all your packages on new macOS machines
+- **Cross-platform** - Works on macOS and Linux (Ghostty config macOS-only)
+- **Automatic Homebrew** - Installs and manages packages on both macOS and Linux
+- **Smart fallback** - Uses native package managers on Linux if Homebrew fails
 - **Extensible** - Local overrides via `~/.bashrc.local`
 
-## macOS Features
+## Automatic Package Management
 
-On macOS, the dotfiles will automatically:
+### Homebrew (macOS & Linux)
 
-1. **Install all your Homebrew packages** from the Brewfile
+The dotfiles automatically install and manage Homebrew on both platforms:
+
+1. **Auto-install Homebrew** if not present (non-interactive)
+   - macOS: Uses standard Homebrew installation
+   - Linux: Installs Linuxbrew/Homebrew for Linux
+
+2. **Install all packages** from the Brewfile
    - 60+ formulae (development tools, CLI utilities, system libraries)
    - 6 casks (Ghostty, Docker, DevPod, ClickHouse, Proton Mail, OpenVPN Connect)
    - Nerd Fonts for proper icon rendering
 
-2. **Keep packages in sync** across machines
+3. **Keep packages in sync** across machines
    - Automatically install missing packages on `chezmoi apply`
    - Update Homebrew when Brewfile changes
 
-3. **Configure Ghostty terminal** with Catppuccin Mocha theme
+4. **Smart fallback** (Linux only)
+   - If Homebrew installation fails, falls back to native package managers (apt/dnf/yum/apk)
+   - Ensures core tools are always installed
+
+### macOS-Specific Features
+
+On macOS, additional configuration includes:
+
+1. **Ghostty terminal** with Catppuccin Mocha theme
+2. **Cask applications** (Ghostty, Docker Desktop, etc.)
 
 ### Brewfile Highlights
 

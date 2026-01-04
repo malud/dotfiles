@@ -2,6 +2,13 @@
 {{ if ne .chezmoi.os "darwin" -}}
 set -euo pipefail
 
+# If Homebrew is available on Linux, skip this script (use Brewfile instead)
+if command -v brew &>/dev/null; then
+  echo "ℹ️  Homebrew detected - tools will be installed via Brewfile"
+  echo "ℹ️  Skipping native package manager installation"
+  exit 0
+fi
+
 echo "📦 Installing modern CLI tools for bash..."
 
 # Detect package manager
@@ -114,6 +121,7 @@ command -v fd &>/dev/null && echo "  ✓ fd (better find)"
 command -v rg &>/dev/null && echo "  ✓ rg (better grep)"
 command -v fzf &>/dev/null && echo "  ✓ fzf (fuzzy finder)"
 command -v zoxide &>/dev/null && echo "  ✓ zoxide (smarter cd)"
+command -v starship &>/dev/null && echo "  ✓ starship (prompt)"
 
 {{ else -}}
 echo "⚠️  This script is for non-macOS systems only"
