@@ -2,33 +2,43 @@
 {{ if eq .chezmoi.os "darwin" -}}
 set -euo pipefail
 
-if command -v brew &>/dev/null; then
+# Check if Homebrew is already installed
+if [ -f /opt/homebrew/bin/brew ] || [ -f /usr/local/bin/brew ]; then
   echo "✅ Homebrew already installed"
+  if [ -f /opt/homebrew/bin/brew ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [ -f /usr/local/bin/brew ]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+  fi
   exit 0
 fi
 
-echo "📦 Installing Homebrew automatically (non-interactive)..."
+echo "📦 Installing Homebrew on macOS (non-interactive)..."
 
 if ! command -v curl &>/dev/null; then
   echo "❌ curl not found. Install curl first."
   exit 1
 fi
 
-# Non-interactive installation (same as Linux)
+# Non-interactive installation
 NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# Setup Homebrew in PATH for Apple Silicon
+# Verify installation and add to PATH
 if [ -f /opt/homebrew/bin/brew ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
+  echo "✅ Homebrew installed successfully!"
+  echo "ℹ️  brew is now available: $(command -v brew)"
 elif [ -f /usr/local/bin/brew ]; then
   eval "$(/usr/local/bin/brew shellenv)"
+  echo "✅ Homebrew installed successfully!"
+  echo "ℹ️  brew is now available: $(command -v brew)"
+else
+  echo "❌ Homebrew installation failed"
+  exit 1
 fi
 
-echo "✅ Homebrew installed successfully!"
-echo "ℹ️  Homebrew will be available after restarting your shell"
-
 {{ else -}}
-echo "⚠️  Homebrew is macOS-only"
+echo "ℹ️  This script is for macOS only - skipping on Linux"
 exit 0
 {{ end -}}
 

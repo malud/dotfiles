@@ -3,13 +3,14 @@
 set -euo pipefail
 
 # If Homebrew is available on Linux, skip this script (use Brewfile instead)
-if command -v brew &>/dev/null; then
-  echo "ℹ️  Homebrew detected - tools will be installed via Brewfile"
-  echo "ℹ️  Skipping native package manager installation"
+if [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
+  echo "ℹ️  Homebrew detected at /home/linuxbrew/.linuxbrew/bin/brew"
+  echo "ℹ️  Tools will be installed via Brewfile - skipping native package manager installation"
   exit 0
 fi
 
 echo "📦 Installing modern CLI tools for bash..."
+echo "ℹ️  Homebrew not found - using native package managers"
 
 # Detect package manager
 if command -v apt-get &>/dev/null; then
