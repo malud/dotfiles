@@ -24,16 +24,6 @@ if [ "$(id -u)" -ne 0 ] && command -v sudo &>/dev/null; then
   USE_SUDO=true
 fi
 
-install_with_cargo() {
-  if ! command -v cargo &>/dev/null; then
-    echo "📦 Installing Rust (needed for modern tools)..."
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-    source "$HOME/.cargo/env"
-  fi
-
-  echo "📦 Installing via cargo..."
-  cargo install "$@"
-}
 
 # Install tools based on package manager
 case "$PKG_MGR" in
@@ -297,9 +287,41 @@ case "$PKG_MGR" in
       rm /tmp/k9s.tar.gz
     fi
 
-    # eza and zoxide not in apt, install via cargo
-    command -v eza &>/dev/null || install_with_cargo eza
-    command -v zoxide &>/dev/null || install_with_cargo zoxide
+    # eza (modern ls replacement)
+    if ! command -v eza &>/dev/null; then
+      echo "📦 Installing eza..."
+      EZA_VERSION="v0.20.11"
+      ARCH="$(uname -m)"
+      if [ "$ARCH" = "x86_64" ]; then
+        EZA_ARCH="x86_64"
+      elif [ "$ARCH" = "aarch64" ]; then
+        EZA_ARCH="aarch64"
+      else
+        EZA_ARCH="x86_64"
+      fi
+      curl -sL "https://github.com/eza-community/eza/releases/download/${EZA_VERSION}/eza_${EZA_ARCH}-unknown-linux-gnu.tar.gz" -o /tmp/eza.tar.gz
+      tar -xzf /tmp/eza.tar.gz -C /tmp
+      mv /tmp/eza "$HOME/.local/bin/"
+      rm /tmp/eza.tar.gz
+    fi
+
+    # zoxide (smarter cd)
+    if ! command -v zoxide &>/dev/null; then
+      echo "📦 Installing zoxide..."
+      ZOXIDE_VERSION="v0.9.6"
+      ARCH="$(uname -m)"
+      if [ "$ARCH" = "x86_64" ]; then
+        ZOXIDE_ARCH="x86_64"
+      elif [ "$ARCH" = "aarch64" ]; then
+        ZOXIDE_ARCH="aarch64"
+      else
+        ZOXIDE_ARCH="x86_64"
+      fi
+      curl -sL "https://github.com/ajeetdsouza/zoxide/releases/download/${ZOXIDE_VERSION}/zoxide-${ZOXIDE_VERSION}-${ZOXIDE_ARCH}-unknown-linux-musl.tar.gz" -o /tmp/zoxide.tar.gz
+      tar -xzf /tmp/zoxide.tar.gz -C /tmp
+      mv /tmp/zoxide "$HOME/.local/bin/"
+      rm /tmp/zoxide.tar.gz
+    fi
     ;;
 
   dnf|yum)
@@ -317,9 +339,43 @@ case "$PKG_MGR" in
       command -v fzf &>/dev/null || "$PKG_MGR" install -y fzf
     fi
 
-    # eza and zoxide not in dnf/yum, install via cargo
-    command -v eza &>/dev/null || install_with_cargo eza
-    command -v zoxide &>/dev/null || install_with_cargo zoxide
+    # eza (modern ls replacement)
+    if ! command -v eza &>/dev/null; then
+      echo "📦 Installing eza..."
+      EZA_VERSION="v0.20.11"
+      ARCH="$(uname -m)"
+      if [ "$ARCH" = "x86_64" ]; then
+        EZA_ARCH="x86_64"
+      elif [ "$ARCH" = "aarch64" ]; then
+        EZA_ARCH="aarch64"
+      else
+        EZA_ARCH="x86_64"
+      fi
+      mkdir -p "$HOME/.local/bin"
+      curl -sL "https://github.com/eza-community/eza/releases/download/${EZA_VERSION}/eza_${EZA_ARCH}-unknown-linux-gnu.tar.gz" -o /tmp/eza.tar.gz
+      tar -xzf /tmp/eza.tar.gz -C /tmp
+      mv /tmp/eza "$HOME/.local/bin/"
+      rm /tmp/eza.tar.gz
+    fi
+
+    # zoxide (smarter cd)
+    if ! command -v zoxide &>/dev/null; then
+      echo "📦 Installing zoxide..."
+      ZOXIDE_VERSION="v0.9.6"
+      ARCH="$(uname -m)"
+      if [ "$ARCH" = "x86_64" ]; then
+        ZOXIDE_ARCH="x86_64"
+      elif [ "$ARCH" = "aarch64" ]; then
+        ZOXIDE_ARCH="aarch64"
+      else
+        ZOXIDE_ARCH="x86_64"
+      fi
+      mkdir -p "$HOME/.local/bin"
+      curl -sL "https://github.com/ajeetdsouza/zoxide/releases/download/${ZOXIDE_VERSION}/zoxide-${ZOXIDE_VERSION}-${ZOXIDE_ARCH}-unknown-linux-musl.tar.gz" -o /tmp/zoxide.tar.gz
+      tar -xzf /tmp/zoxide.tar.gz -C /tmp
+      mv /tmp/zoxide "$HOME/.local/bin/"
+      rm /tmp/zoxide.tar.gz
+    fi
     ;;
 
   apk)
@@ -337,14 +393,139 @@ case "$PKG_MGR" in
       command -v fzf &>/dev/null || apk add fzf
     fi
 
-    # eza and zoxide not in apk, install via cargo
-    command -v eza &>/dev/null || install_with_cargo eza
-    command -v zoxide &>/dev/null || install_with_cargo zoxide
+    # eza (modern ls replacement)
+    if ! command -v eza &>/dev/null; then
+      echo "📦 Installing eza..."
+      EZA_VERSION="v0.20.11"
+      ARCH="$(uname -m)"
+      if [ "$ARCH" = "x86_64" ]; then
+        EZA_ARCH="x86_64"
+      elif [ "$ARCH" = "aarch64" ]; then
+        EZA_ARCH="aarch64"
+      else
+        EZA_ARCH="x86_64"
+      fi
+      mkdir -p "$HOME/.local/bin"
+      curl -sL "https://github.com/eza-community/eza/releases/download/${EZA_VERSION}/eza_${EZA_ARCH}-unknown-linux-musl.tar.gz" -o /tmp/eza.tar.gz
+      tar -xzf /tmp/eza.tar.gz -C /tmp
+      mv /tmp/eza "$HOME/.local/bin/"
+      rm /tmp/eza.tar.gz
+    fi
+
+    # zoxide (smarter cd)
+    if ! command -v zoxide &>/dev/null; then
+      echo "📦 Installing zoxide..."
+      ZOXIDE_VERSION="v0.9.6"
+      ARCH="$(uname -m)"
+      if [ "$ARCH" = "x86_64" ]; then
+        ZOXIDE_ARCH="x86_64"
+      elif [ "$ARCH" = "aarch64" ]; then
+        ZOXIDE_ARCH="aarch64"
+      else
+        ZOXIDE_ARCH="x86_64"
+      fi
+      mkdir -p "$HOME/.local/bin"
+      curl -sL "https://github.com/ajeetdsouza/zoxide/releases/download/${ZOXIDE_VERSION}/zoxide-${ZOXIDE_VERSION}-${ZOXIDE_ARCH}-unknown-linux-musl.tar.gz" -o /tmp/zoxide.tar.gz
+      tar -xzf /tmp/zoxide.tar.gz -C /tmp
+      mv /tmp/zoxide "$HOME/.local/bin/"
+      rm /tmp/zoxide.tar.gz
+    fi
     ;;
 
   none)
-    echo "📦 Installing all tools via cargo..."
-    install_with_cargo bat fd-find ripgrep eza zoxide
+    echo "📦 Installing all tools via pre-built binaries..."
+
+    mkdir -p "$HOME/.local/bin"
+
+    # bat
+    if ! command -v bat &>/dev/null; then
+      echo "📦 Installing bat..."
+      BAT_VERSION="v0.24.0"
+      ARCH="$(uname -m)"
+      if [ "$ARCH" = "x86_64" ]; then
+        BAT_ARCH="x86_64"
+      elif [ "$ARCH" = "aarch64" ]; then
+        BAT_ARCH="aarch64"
+      else
+        BAT_ARCH="x86_64"
+      fi
+      curl -sL "https://github.com/sharkdp/bat/releases/download/${BAT_VERSION}/bat-${BAT_VERSION}-${BAT_ARCH}-unknown-linux-musl.tar.gz" -o /tmp/bat.tar.gz
+      tar -xzf /tmp/bat.tar.gz -C /tmp
+      mv /tmp/bat-${BAT_VERSION}-${BAT_ARCH}-unknown-linux-musl/bat "$HOME/.local/bin/"
+      rm -rf /tmp/bat.tar.gz /tmp/bat-${BAT_VERSION}-${BAT_ARCH}-unknown-linux-musl
+    fi
+
+    # fd
+    if ! command -v fd &>/dev/null; then
+      echo "📦 Installing fd..."
+      FD_VERSION="v10.2.0"
+      ARCH="$(uname -m)"
+      if [ "$ARCH" = "x86_64" ]; then
+        FD_ARCH="x86_64"
+      elif [ "$ARCH" = "aarch64" ]; then
+        FD_ARCH="aarch64"
+      else
+        FD_ARCH="x86_64"
+      fi
+      curl -sL "https://github.com/sharkdp/fd/releases/download/${FD_VERSION}/fd-${FD_VERSION}-${FD_ARCH}-unknown-linux-musl.tar.gz" -o /tmp/fd.tar.gz
+      tar -xzf /tmp/fd.tar.gz -C /tmp
+      mv /tmp/fd-${FD_VERSION}-${FD_ARCH}-unknown-linux-musl/fd "$HOME/.local/bin/"
+      rm -rf /tmp/fd.tar.gz /tmp/fd-${FD_VERSION}-${FD_ARCH}-unknown-linux-musl
+    fi
+
+    # ripgrep
+    if ! command -v rg &>/dev/null; then
+      echo "📦 Installing ripgrep..."
+      RG_VERSION="14.1.1"
+      ARCH="$(uname -m)"
+      if [ "$ARCH" = "x86_64" ]; then
+        RG_ARCH="x86_64"
+      elif [ "$ARCH" = "aarch64" ]; then
+        RG_ARCH="aarch64"
+      else
+        RG_ARCH="x86_64"
+      fi
+      curl -sL "https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}/ripgrep-${RG_VERSION}-${RG_ARCH}-unknown-linux-musl.tar.gz" -o /tmp/rg.tar.gz
+      tar -xzf /tmp/rg.tar.gz -C /tmp
+      mv /tmp/ripgrep-${RG_VERSION}-${RG_ARCH}-unknown-linux-musl/rg "$HOME/.local/bin/"
+      rm -rf /tmp/rg.tar.gz /tmp/ripgrep-${RG_VERSION}-${RG_ARCH}-unknown-linux-musl
+    fi
+
+    # eza
+    if ! command -v eza &>/dev/null; then
+      echo "📦 Installing eza..."
+      EZA_VERSION="v0.20.11"
+      ARCH="$(uname -m)"
+      if [ "$ARCH" = "x86_64" ]; then
+        EZA_ARCH="x86_64"
+      elif [ "$ARCH" = "aarch64" ]; then
+        EZA_ARCH="aarch64"
+      else
+        EZA_ARCH="x86_64"
+      fi
+      curl -sL "https://github.com/eza-community/eza/releases/download/${EZA_VERSION}/eza_${EZA_ARCH}-unknown-linux-musl.tar.gz" -o /tmp/eza.tar.gz
+      tar -xzf /tmp/eza.tar.gz -C /tmp
+      mv /tmp/eza "$HOME/.local/bin/"
+      rm /tmp/eza.tar.gz
+    fi
+
+    # zoxide
+    if ! command -v zoxide &>/dev/null; then
+      echo "📦 Installing zoxide..."
+      ZOXIDE_VERSION="v0.9.6"
+      ARCH="$(uname -m)"
+      if [ "$ARCH" = "x86_64" ]; then
+        ZOXIDE_ARCH="x86_64"
+      elif [ "$ARCH" = "aarch64" ]; then
+        ZOXIDE_ARCH="aarch64"
+      else
+        ZOXIDE_ARCH="x86_64"
+      fi
+      curl -sL "https://github.com/ajeetdsouza/zoxide/releases/download/${ZOXIDE_VERSION}/zoxide-${ZOXIDE_VERSION}-${ZOXIDE_ARCH}-unknown-linux-musl.tar.gz" -o /tmp/zoxide.tar.gz
+      tar -xzf /tmp/zoxide.tar.gz -C /tmp
+      mv /tmp/zoxide "$HOME/.local/bin/"
+      rm /tmp/zoxide.tar.gz
+    fi
 
     # fzf via git
     if ! command -v fzf &>/dev/null; then
