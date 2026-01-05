@@ -147,7 +147,7 @@ require("lazy").setup({
 
 -- Key mappings
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>', { desc = 'Clear search highlight' })
-vim.keymap.set('n', '<leader>e', vim.cmd.Ex, { desc = 'File explorer' })
+vim.keymap.set('n', '<leader>e', '<cmd>Ex<CR>', { desc = 'File explorer' })
 
 -- Save file
 vim.keymap.set('n', '<C-s>', '<cmd>w<CR>', { desc = 'Save file' })

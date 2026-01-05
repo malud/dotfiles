@@ -92,10 +92,16 @@ case "$PKG_MGR" in
     fi
 
     # Essential development tools
+
+    # Install newer Neovim from unstable PPA (required for lazy.nvim which needs >= 0.8.0)
     if ! command -v nvim &>/dev/null; then
       if [ "$USE_SUDO" = true ]; then
+        sudo add-apt-repository -y ppa:neovim-ppa/unstable
+        sudo apt-get update
         sudo apt-get install -y neovim
       else
+        add-apt-repository -y ppa:neovim-ppa/unstable
+        apt-get update
         apt-get install -y neovim
       fi
     fi
@@ -141,10 +147,32 @@ case "$PKG_MGR" in
       mv kubectl "$HOME/.local/bin/"
     fi
 
-    # helm
-    if ! command -v helm &>/dev/null; then
-      echo "📦 Installing helm..."
-      curl -sL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+    # krew (kubectl plugin manager)
+    if ! command -v kubectl-krew &>/dev/null; then
+      echo "📦 Installing krew..."
+      (
+        set -x; cd "$(mktemp -d)" &&
+        OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+        ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+        KREW="krew-${OS}_${ARCH}" &&
+        curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+        tar zxvf "${KREW}.tar.gz" &&
+        ./"${KREW}" install krew
+      )
+      export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+    fi
+
+    # kustomize with helm plugin
+    if ! command -v kustomize &>/dev/null; then
+      echo "📦 Installing kustomize..."
+      curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+      mv kustomize "$HOME/.local/bin/"
+
+      # Install helm plugin for kustomize
+      echo "📦 Installing kustomize helm plugin..."
+      mkdir -p "$HOME/.config/kustomize/plugin"
+      cd "$HOME/.config/kustomize/plugin"
+      kustomize plugin install https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v5.0.0/kustomize_v5.0.0_linux_amd64.tar.gz || true
     fi
 
     # k9s
@@ -237,7 +265,8 @@ command -v git &>/dev/null && echo "  ✓ git (version control)"
 command -v jq &>/dev/null && echo "  ✓ jq (JSON processor)"
 command -v yq &>/dev/null && echo "  ✓ yq (YAML processor)"
 command -v kubectl &>/dev/null && echo "  ✓ kubectl (kubernetes CLI)"
-command -v kustomize &>/dev/null && echo "  ✓ kustomize (kubernetes config management)"
+command -v kubectl-krew &>/dev/null && echo "  ✓ krew (kubectl plugin manager)"
+command -v kustomize &>/dev/null && echo "  ✓ kustomize (kubernetes config management with helm plugin)"
 command -v k9s &>/dev/null && echo "  ✓ k9s (kubernetes TUI)"
 echo ""
 echo "ℹ️  Note: Nerd Font icons are rendered by your local terminal/VSCode"
