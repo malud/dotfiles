@@ -9,6 +9,18 @@ export VISUAL="$EDITOR"
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
+# Fix TERM for better compatibility over SSH and remote environments
+# Ghostty uses xterm-ghostty which may not be available on remote systems
+if [[ "$TERM" == "xterm-ghostty" ]]; then
+  # Detect remote/container environment by checking:
+  # - vscode user (devcontainers)
+  # - no DISPLAY set (headless/SSH)
+  # - terminfo not available
+  if [[ "$USER" == "vscode" ]] || [[ -z "$DISPLAY" ]] || ! infocmp "$TERM" &>/dev/null; then
+    export TERM=xterm-256color
+  fi
+fi
+
 # XDG Base Directory
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
@@ -119,12 +131,15 @@ alias glog='git log --oneline --graph --decorate'
 # Modern replacements (if available)
 # bat aliases - syntax highlighted cat
 if command -v bat &>/dev/null; then
+  # Configure bat's pager to suppress warnings
+  export BAT_PAGER="less -RF"
+
   # cat replacement - no paging, just print with syntax highlighting
   alias cat='bat --paging=never --style=plain'
   # verbose mode - with line numbers and git changes
   alias catt='bat --paging=never'
-  # pager mode - for reading long files
-  alias bcat='bat'
+  # pager mode - for reading long files (auto-paging based on content size)
+  alias bcat='bat --paging=auto'
 fi
 command -v eza &>/dev/null && alias ls='eza' && alias ll='eza -alh' && alias la='eza -a'
 command -v fd &>/dev/null && alias find='fd'
