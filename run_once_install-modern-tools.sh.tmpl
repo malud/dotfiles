@@ -93,16 +93,21 @@ case "$PKG_MGR" in
 
     # Essential development tools
 
-    # Install newer Neovim from unstable PPA (required for lazy.nvim which needs >= 0.8.0)
+    # Install Neovim (using AppImage for latest version - required for lazy.nvim which needs >= 0.8.0)
     if ! command -v nvim &>/dev/null; then
-      if [ "$USE_SUDO" = true ]; then
-        sudo add-apt-repository -y ppa:neovim-ppa/unstable
-        sudo apt-get update
-        sudo apt-get install -y neovim
-      else
-        add-apt-repository -y ppa:neovim-ppa/unstable
-        apt-get update
-        apt-get install -y neovim
+      echo "📦 Installing Neovim (latest stable via AppImage)..."
+      mkdir -p "$HOME/.local/bin"
+      curl -sLo "$HOME/.local/bin/nvim" https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+      chmod +x "$HOME/.local/bin/nvim"
+
+      # Check if AppImage works, if not extract it
+      if ! "$HOME/.local/bin/nvim" --version &>/dev/null; then
+        echo "📦 AppImage not supported, extracting Neovim..."
+        cd "$HOME/.local/bin"
+        ./nvim --appimage-extract &>/dev/null || true
+        rm nvim
+        mv squashfs-root nvim-squashfs
+        ln -s "$HOME/.local/bin/nvim-squashfs/usr/bin/nvim" "$HOME/.local/bin/nvim"
       fi
     fi
 
