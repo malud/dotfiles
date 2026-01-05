@@ -1,6 +1,7 @@
 [user]
  name = {{ .name }}
  email = {{ .email }}
+ signingkey = {{ .signingkey }}
 
 [core]
  editor = vim
@@ -17,7 +18,11 @@
  format = ssh
 
 [gpg "ssh"]
+ {{ if eq .chezmoi.os "darwin" -}}
+ program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+ {{ else -}}
  defaultKeyCommand = ssh-add -L
+ {{ end -}}
 
 [pull]
  rebase = true
