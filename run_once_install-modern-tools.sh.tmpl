@@ -97,17 +97,46 @@ case "$PKG_MGR" in
     if ! command -v nvim &>/dev/null; then
       echo "📦 Installing Neovim (latest stable via AppImage)..."
       mkdir -p "$HOME/.local/bin"
-      curl -sLo "$HOME/.local/bin/nvim" https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
-      chmod +x "$HOME/.local/bin/nvim"
+
+      # Download AppImage to temp directory first
+      NVIM_TMP=$(mktemp -d)
+      curl -sLo "$NVIM_TMP/nvim.appimage" https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+      chmod +x "$NVIM_TMP/nvim.appimage"
 
       # Check if AppImage works, if not extract it
-      if ! "$HOME/.local/bin/nvim" --version &>/dev/null; then
-        echo "📦 AppImage not supported, extracting Neovim..."
-        cd "$HOME/.local/bin"
-        ./nvim --appimage-extract &>/dev/null || true
-        rm nvim
-        mv squashfs-root nvim-squashfs
-        ln -s "$HOME/.local/bin/nvim-squashfs/usr/bin/nvim" "$HOME/.local/bin/nvim"
+      if "$NVIM_TMP/nvim.appimage" --version &>/dev/null; then
+        echo "📦 AppImage works, installing..."
+        mv "$NVIM_TMP/nvim.appimage" "$HOME/.local/bin/nvim"
+        rm -rf "$NVIM_TMP"
+      else
+        echo "📦 AppImage not supported (FUSE unavailable), extracting..."
+        cd "$NVIM_TMP"
+
+        # Extract AppImage - this creates squashfs-root directory
+        ./nvim.appimage --appimage-extract >/dev/null 2>&1
+
+        # Verify extraction succeeded
+        if [ -d "squashfs-root" ]; then
+          echo "✓ Extraction successful"
+          mv squashfs-root "$HOME/.local/bin/nvim-squashfs"
+          ln -sf "$HOME/.local/bin/nvim-squashfs/usr/bin/nvim" "$HOME/.local/bin/nvim"
+          cd - >/dev/null
+          rm -rf "$NVIM_TMP"
+        else
+          echo "⚠️ Extraction failed, trying alternative installation method..."
+          cd - >/dev/null
+          rm -rf "$NVIM_TMP"
+
+          # Fallback: try to install via apt (might be older version)
+          if [ "$USE_SUDO" = true ]; then
+            sudo apt-get install -y software-properties-common
+            sudo add-apt-repository -y ppa:neovim-ppa/unstable || true
+            sudo apt-get update
+            sudo apt-get install -y neovim
+          else
+            apt-get install -y neovim
+          fi
+        fi
       fi
     fi
 
