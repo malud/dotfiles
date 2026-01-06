@@ -195,7 +195,7 @@ case "$PKG_MGR" in
     # trippy (modern traceroute with TUI)
     if ! command -v trip &>/dev/null; then
       echo "📦 Installing trippy..."
-      TRIPPY_VERSION="0.12.0"
+      TRIPPY_VERSION="0.13.0"
       ARCH="$(uname -m)"
       if [ "$ARCH" = "x86_64" ]; then
         TRIPPY_ARCH="x86_64"
@@ -206,8 +206,7 @@ case "$PKG_MGR" in
       fi
       mkdir -p "$HOME/.local/bin"
       TRIPPY_TMP=$(mktemp -d)
-
-      if curl -fsSL "https://github.com/fujiapple852/trippy/releases/download/${TRIPPY_VERSION}/trippy-${TRIPPY_VERSION}-${TRIPPY_ARCH}-unknown-linux-gnu.tar.gz" -o "$TRIPPY_TMP/trippy.tar.gz"; then
+      if curl -fsSL "https://github.com/fujiapple852/trippy/releases/download/${TRIPPY_VERSION}/trippy-${TRIPPY_VERSION}-${TRIPPY_ARCH}-unknown-linux-musl.tar.gz" -o "$TRIPPY_TMP/trippy.tar.gz"; then
         if tar -xzf "$TRIPPY_TMP/trippy.tar.gz" -C "$TRIPPY_TMP" 2>/dev/null; then
           mv "$TRIPPY_TMP/trip" "$HOME/.local/bin/" 2>/dev/null || echo "  ⚠️  Failed to move trip binary, skipping..."
           if [ -f "$HOME/.local/bin/trip" ]; then
