@@ -72,7 +72,7 @@ require("lazy").setup({
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter.configs").setup({
+      require("nvim-treesitter").setup({
         ensure_installed = { "bash", "lua", "python", "go", "yaml", "json", "markdown", "vim" },
         auto_install = true,
         highlight = {
@@ -190,4 +190,3 @@ vim.api.nvim_create_autocmd('BufWritePre', {
     vim.fn.setpos('.', save_cursor)
   end,
 })
-

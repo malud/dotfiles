@@ -4,7 +4,7 @@
  signingkey = {{ .signingkey }}
 
 [core]
- editor = vim
+ editor = nvim
  autocrlf = input
  excludesfile = ~/.gitignore_global
 
@@ -18,11 +18,11 @@
  format = ssh
 
 [gpg "ssh"]
- {{ if eq .chezmoi.os "darwin" -}}
+{{- if eq .chezmoi.os "darwin" }}
  program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
- {{ else -}}
+{{- else }}
  defaultKeyCommand = ssh-add -L
- {{ end -}}
+{{- end }}
 
 [pull]
  rebase = true

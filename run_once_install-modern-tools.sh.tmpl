@@ -83,129 +83,44 @@ case "$PKG_MGR" in
 
     # Essential development tools
 
-    # Install Neovim (using AppImage for latest version - required for lazy.nvim which needs >= 0.8.0)
-    if ! command -v nvim &>/dev/null; then
-      echo "📦 Installing Neovim (latest stable via AppImage)..."
-      mkdir -p "$HOME/.local/bin"
+    # Install Neovim using the official prebuilt tarball (requires curl)
+    if ! command -v nvim >/dev/null 2>&1; then
+      echo "📦 Installing Neovim from official pre-built archive…"
 
-      # Download AppImage to temp directory first
-      NVIM_TMP=$(mktemp -d)
-      if ! curl -sLo "$NVIM_TMP/nvim.appimage" https://github.com/neovim/neovim/releases/latest/download/nvim.appimage; then
-        echo "⚠️ Failed to download Neovim AppImage, falling back to apt"
-        rm -rf "$NVIM_TMP"
+      # Determine architecture and choose the correct tarball name
+      arch="$(uname -m)"
+      case "$arch" in
+        x86_64)
+          nvim_pkg="nvim-linux-x86_64.tar.gz"
+          ;;
+        aarch64|arm64)
+          nvim_pkg="nvim-linux-arm64.tar.gz"
+          ;;
+        *)
+          echo "⚠️ Unsupported architecture: $arch"
+          return 0
+          ;;
+      esac
 
-        # Fallback to apt immediately
-        if [ "$USE_SUDO" = true ]; then
-          sudo apt-get install -y software-properties-common || true
-          sudo add-apt-repository -y ppa:neovim-ppa/unstable || true
-          sudo apt-get update || true
-          sudo apt-get install -y neovim || true
-        else
-          apt-get install -y neovim || true
-        fi
-      else
-        chmod +x "$NVIM_TMP/nvim.appimage"
+      # Create a temporary directory for download
+      nvim_tmp=$(mktemp -d)
+      curl -sL -o "$nvim_tmp/$nvim_pkg" \
+        "https://github.com/neovim/neovim/releases/latest/download/${nvim_pkg}"
 
-        # Check if AppImage works, if not extract it
-        if "$NVIM_TMP/nvim.appimage" --version &>/dev/null; then
-          echo "📦 AppImage works, installing..."
-          mv "$NVIM_TMP/nvim.appimage" "$HOME/.local/bin/nvim"
-          rm -rf "$NVIM_TMP"
-        else
-          echo "📦 AppImage not supported (FUSE unavailable), extracting..."
+      # Define install base under $HOME; extract tarball there
+      install_base="$HOME/.local/share/${nvim_pkg%.tar.gz}"
+      rm -rf "$install_base"
+      mkdir -p "$HOME/.local/share" "$HOME/.local/bin"
+      tar -C "$HOME/.local/share" -xzf "$nvim_tmp/$nvim_pkg"
 
-          # Temporarily disable exit on error for extraction
-          set +e
+      # Create/update symlink in ~/.local/bin to the Neovim binary
+      ln -sfn "$install_base/bin/nvim" "$HOME/.local/bin/nvim"
 
-          # Save current directory
-          PREV_DIR=$(pwd)
-          cd "$NVIM_TMP" || {
-            set -e
-            rm -rf "$NVIM_TMP"
-            echo "⚠️ Failed to change directory"
-            if [ "$USE_SUDO" = true ]; then
-              sudo apt-get install -y neovim || true
-            else
-              apt-get install -y neovim || true
-            fi
-            cd "$PREV_DIR"
-            return 0
-          }
+      # Clean up temporary directory
+      rm -rf "$nvim_tmp"
 
-          # Extract AppImage - this creates squashfs-root directory
-          echo "📦 Running extraction (this may take a moment)..."
-          ./nvim.appimage --appimage-extract
-          EXTRACT_STATUS=$?
-
-          # Re-enable exit on error
-          set -e
-
-          if [ $EXTRACT_STATUS -eq 0 ] && [ -d "squashfs-root" ]; then
-            echo "✓ Extraction successful"
-            mv squashfs-root "$HOME/.local/bin/nvim-squashfs"
-            ln -sf "$HOME/.local/bin/nvim-squashfs/usr/bin/nvim" "$HOME/.local/bin/nvim"
-            cd "$PREV_DIR"
-            rm -rf "$NVIM_TMP"
-          else
-            echo "⚠️ AppImage extraction failed (exit code: $EXTRACT_STATUS)"
-            cd "$PREV_DIR"
-            rm -rf "$NVIM_TMP"
-
-            # Fallback: try to install via apt (might be older version)
-            echo "📦 Falling back to apt installation..."
-            if [ "$USE_SUDO" = true ]; then
-              sudo apt-get install -y software-properties-common || true
-              sudo add-apt-repository -y ppa:neovim-ppa/unstable || true
-              sudo apt-get update || true
-              sudo apt-get install -y neovim || true
-            else
-              apt-get install -y neovim || true
-            fi
-          fi
-        fi
-      fi
-
-      # Final check if nvim is now available
-      if ! command -v nvim &>/dev/null; then
-        echo "⚠️ Neovim installation failed - trying last resort build from source"
-        echo "ℹ️  This may take several minutes..."
-
-        # Install build dependencies
-        if [ "$USE_SUDO" = true ]; then
-          sudo apt-get install -y ninja-build gettext cmake unzip curl build-essential || true
-        else
-          apt-get install -y ninja-build gettext cmake unzip curl build-essential || true
-        fi
-
-        # Try building from source as absolute last resort
-        set +e
-        git clone https://github.com/neovim/neovim /tmp/neovim || true
-        if [ -d "/tmp/neovim" ]; then
-          cd /tmp/neovim
-          git checkout stable
-          make CMAKE_BUILD_TYPE=RelWithDebInfo
-          if [ "$USE_SUDO" = true ]; then
-            sudo make install || {
-              echo "⚠️ All Neovim installation methods failed"
-              cd "$PREV_DIR"
-              rm -rf /tmp/neovim
-              set -e
-              return 0
-            }
-          else
-            make install || {
-              echo "⚠️ All Neovim installation methods failed"
-              cd "$PREV_DIR"
-              rm -rf /tmp/neovim
-              set -e
-              return 0
-            }
-          fi
-          cd "$PREV_DIR"
-          rm -rf /tmp/neovim
-        fi
-        set -e
-      fi
+      # Lazy setup plugins
+      $HOME/.local/bin/nvim --headless "+Lazy! sync" "+TSUpdate" +qa
     fi
 
     if ! command -v tmux &>/dev/null; then
