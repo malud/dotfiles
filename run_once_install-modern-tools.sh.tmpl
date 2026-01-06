@@ -123,6 +123,95 @@ case "$PKG_MGR" in
       $HOME/.local/bin/nvim --headless "+Lazy! sync" "+TSUpdate" +qa
     fi
 
+    # Network debugging tools
+    echo "📦 Installing network debugging tools..."
+
+    # netcat (traditional networking tool)
+    if ! command -v nc &>/dev/null; then
+      if [ "$USE_SUDO" = true ]; then
+        sudo apt-get install -y netcat-openbsd
+      else
+        apt-get install -y netcat-openbsd
+      fi
+    fi
+
+    # nmap (network scanner)
+    if ! command -v nmap &>/dev/null; then
+      if [ "$USE_SUDO" = true ]; then
+        sudo apt-get install -y nmap
+      else
+        apt-get install -y nmap
+      fi
+    fi
+
+    # mtr (network diagnostic tool - combines ping and traceroute)
+    if ! command -v mtr &>/dev/null; then
+      if [ "$USE_SUDO" = true ]; then
+        sudo apt-get install -y mtr-tiny
+      else
+        apt-get install -y mtr-tiny
+      fi
+    fi
+
+    # gping (ping with a graph)
+    if ! command -v gping &>/dev/null; then
+      echo "📦 Installing gping..."
+      GPING_VERSION="v1.18.0"
+      ARCH="$(uname -m)"
+      if [ "$ARCH" = "x86_64" ]; then
+        GPING_ARCH="x86_64"
+      elif [ "$ARCH" = "aarch64" ]; then
+        GPING_ARCH="aarch64"
+      else
+        GPING_ARCH="x86_64"
+      fi
+      mkdir -p "$HOME/.local/bin"
+      curl -sL "https://github.com/orf/gping/releases/download/${GPING_VERSION}/gping-${GPING_ARCH}-unknown-linux-musl.tar.gz" -o /tmp/gping.tar.gz
+      tar -xzf /tmp/gping.tar.gz -C /tmp
+      mv /tmp/gping "$HOME/.local/bin/"
+      rm /tmp/gping.tar.gz
+    fi
+
+    # trippy (modern traceroute with TUI)
+    if ! command -v trip &>/dev/null; then
+      echo "📦 Installing trippy..."
+      TRIPPY_VERSION="0.12.0"
+      ARCH="$(uname -m)"
+      if [ "$ARCH" = "x86_64" ]; then
+        TRIPPY_ARCH="x86_64"
+      elif [ "$ARCH" = "aarch64" ]; then
+        TRIPPY_ARCH="aarch64"
+      else
+        TRIPPY_ARCH="x86_64"
+      fi
+      mkdir -p "$HOME/.local/bin"
+      curl -sL "https://github.com/fujiapple852/trippy/releases/download/${TRIPPY_VERSION}/trippy-${TRIPPY_VERSION}-${TRIPPY_ARCH}-unknown-linux-gnu.tar.gz" -o /tmp/trippy.tar.gz
+      tar -xzf /tmp/trippy.tar.gz -C /tmp
+      mv /tmp/trip "$HOME/.local/bin/"
+      rm /tmp/trippy.tar.gz
+    fi
+
+    # bandwhich (network utilization by process - requires root/capabilities)
+    if ! command -v bandwhich &>/dev/null; then
+      echo "📦 Installing bandwhich..."
+      BANDWHICH_VERSION="v0.23.1"
+      ARCH="$(uname -m)"
+      if [ "$ARCH" = "x86_64" ]; then
+        BANDWHICH_ARCH="x86_64"
+      elif [ "$ARCH" = "aarch64" ]; then
+        BANDWHICH_ARCH="aarch64"
+      else
+        BANDWHICH_ARCH="x86_64"
+      fi
+      mkdir -p "$HOME/.local/bin"
+      curl -sL "https://github.com/imsnif/bandwhich/releases/download/${BANDWHICH_VERSION}/bandwhich-${BANDWHICH_VERSION}-${BANDWHICH_ARCH}-unknown-linux-musl.tar.gz" -o /tmp/bandwhich.tar.gz
+      tar -xzf /tmp/bandwhich.tar.gz -C /tmp
+      mv /tmp/bandwhich "$HOME/.local/bin/"
+      rm /tmp/bandwhich.tar.gz
+      echo "ℹ️  bandwhich requires root privileges or CAP_NET_RAW capability to run"
+      echo "   Run: sudo setcap cap_net_raw,cap_net_admin+ep \$(which bandwhich)"
+    fi
+
     if ! command -v tmux &>/dev/null; then
       if [ "$USE_SUDO" = true ]; then
         sudo apt-get install -y tmux
@@ -476,6 +565,14 @@ command -v kubectl &>/dev/null && echo "  ✓ kubectl (kubernetes CLI)"
 command -v kubectl-krew &>/dev/null && echo "  ✓ krew (kubectl plugin manager)"
 command -v kustomize &>/dev/null && echo "  ✓ kustomize (kubernetes config management with helm plugin)"
 command -v k9s &>/dev/null && echo "  ✓ k9s (kubernetes TUI)"
+echo ""
+echo "Network debugging tools:"
+command -v gping &>/dev/null && echo "  ✓ gping (ping with graph)"
+command -v trip &>/dev/null && echo "  ✓ trippy (modern traceroute)"
+command -v bandwhich &>/dev/null && echo "  ✓ bandwhich (network usage by process - requires root)"
+command -v nc &>/dev/null && echo "  ✓ netcat (TCP/UDP connection tool)"
+command -v nmap &>/dev/null && echo "  ✓ nmap (network scanner)"
+command -v mtr &>/dev/null && echo "  ✓ mtr (network diagnostic tool)"
 echo ""
 echo "ℹ️  Note: Nerd Font icons are rendered by your local terminal/VSCode"
 echo "   Ensure 'SauceCodePro Nerd Font' is installed on your host system (macOS)"

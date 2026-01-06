@@ -301,6 +301,21 @@ Just run `nvim` and wait for the initial setup to complete!
 
 **Note:** Node.js is intentionally not included. Use devcontainers for Node projects.
 
+## 🌐 Network Debugging Tools
+
+Modern alternatives to classic network troubleshooting tools, automatically installed on both macOS and Linux.
+
+### Tool Overview
+
+| Tool | Replaces | Purpose |
+|------|----------|---------|
+| **gping** | `ping` | Ping with a live graph |
+| **trippy** | `traceroute`/`mtr` | Modern traceroute with TUI interface |
+| **bandwhich** | `iftop`/`nethogs` | Network utilization by process (requires root) |
+| **nmap** | - | Network scanner and port discovery |
+| **netcat (nc)** | - | TCP/UDP connection testing |
+| **mtr** | - | Network diagnostic tool (fallback) |
+
 ## 🔗 Resources
 
 - [eza](https://github.com/eza-community/eza) - Modern ls replacement
@@ -313,6 +328,11 @@ Just run `nvim` and wait for the initial setup to complete!
 - [ruff](https://github.com/astral-sh/ruff) - Fast Python linter and formatter
 - [krew](https://krew.sigs.k8s.io/) - kubectl plugin manager
 - [oidc-login](https://github.com/int128/kubelogin) - kubectl plugin for OIDC authentication
+- [dog](https://github.com/ogham/dog) - Modern DNS client (macOS)
+- [gping](https://github.com/orf/gping) - Ping with a graph
+- [trippy](https://github.com/fujiapple852/trippy) - Modern traceroute
+- [bandwhich](https://github.com/imsnif/bandwhich) - Network utilization monitor
+- [nmap](https://nmap.org/) - Network scanner
 
 ## 📋 Related Files
 
