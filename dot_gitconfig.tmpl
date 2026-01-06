@@ -17,12 +17,10 @@
 [gpg]
  format = ssh
 
-[gpg "ssh"]
 {{- if eq .chezmoi.os "darwin" }}
+[gpg "ssh"]
  program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
-{{- else }}
- defaultKeyCommand = ssh-add -L
-{{- end }}
+{{- end }} # else case would fallback to e.g. `devpod-ssh-signature`
 
 [pull]
  rebase = true
