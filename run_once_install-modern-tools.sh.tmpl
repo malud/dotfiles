@@ -144,6 +144,15 @@ case "$PKG_MGR" in
       fi
     fi
 
+    # iputils-ping (basic network utility - provides standard ping)
+    if ! command -v ping &>/dev/null; then
+      if [ "$USE_SUDO" = true ]; then
+        sudo apt-get install -y iputils-ping
+      else
+        apt-get install -y iputils-ping
+      fi
+    fi
+
     # mtr (network diagnostic tool - combines ping and traceroute)
     if ! command -v mtr &>/dev/null; then
       if [ "$USE_SUDO" = true ]; then
@@ -153,7 +162,7 @@ case "$PKG_MGR" in
       fi
     fi
 
-    # gping (ping with a graph)
+    # gping (ping with a graph - standalone tool, implements its own ICMP ping)
     if ! command -v gping &>/dev/null; then
       echo "📦 Installing gping..."
       GPING_VERSION="v1.20.1"
@@ -172,6 +181,8 @@ case "$PKG_MGR" in
         if tar -xzf "$GPING_TMP/gping.tar.gz" -C "$GPING_TMP" 2>/dev/null; then
           mv "$GPING_TMP/gping" "$HOME/.local/bin/"
           echo "  ✓ gping installed successfully"
+          echo "  ℹ️  gping may require elevated privileges or capabilities to use raw sockets"
+          echo "     If needed, run: sudo setcap cap_net_raw+ep \$(which gping)"
         else
           echo "  ⚠️  Failed to extract gping, skipping..."
         fi
@@ -441,7 +452,7 @@ case "$PKG_MGR" in
         EZA_ARCH="x86_64"
       fi
       mkdir -p "$HOME/.local/bin"
-      curl -sL "https://github.com/eza-community/eza/releases/download/${EZA_VERSION}/eza_${EZA_ARCH}-unknown-linux-musl.tar.gz" -o /tmp/eza.tar.gz
+      curl -sL "https://github.com/eza-community/eza/releases/download/${EZA_VERSION}/eza_${EZA_ARCH}-unknown-linux-gnu.tar.gz" -o /tmp/eza.tar.gz
       tar -xzf /tmp/eza.tar.gz -C /tmp
       mv /tmp/eza "$HOME/.local/bin/"
       rm /tmp/eza.tar.gz
