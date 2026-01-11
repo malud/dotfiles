@@ -1,0 +1,334 @@
+---
+- name: Install Development Tools and Modern CLI Utilities
+  hosts: localhost
+  connection: local
+  become: false
+
+  vars:
+    local_bin: "{{ ansible_env.HOME }}/.local/bin"
+    local_share: "{{ ansible_env.HOME }}/.local/share"
+
+  tasks:
+    # Update package cache
+    - name: Update package cache (apt)
+      become: true
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_pkg_mgr == "apt"
+
+    # Install core utilities via package manager
+    - name: Install core CLI tools (apt)
+      become: true
+      apt:
+        name:
+          - bat
+          - fd-find
+          - ripgrep
+          - fzf
+          - netcat-openbsd
+          - nmap
+          - iputils-ping
+          - mtr-tiny
+          - curl
+          - wget
+          - git
+          - jq
+          - unzip
+          - tar
+        state: present
+      when: ansible_pkg_mgr == "apt"
+
+    - name: Install core CLI tools (dnf/yum)
+      become: true
+      package:
+        name:
+          - bat
+          - fd-find
+          - ripgrep
+          - fzf
+          - nmap-ncat
+          - nmap
+          - iputils
+          - mtr
+          - curl
+          - wget
+          - git
+          - jq
+          - unzip
+          - tar
+        state: present
+      when: ansible_pkg_mgr in ["dnf", "yum"]
+
+    - name: Install core CLI tools (apk)
+      become: true
+      apk:
+        name:
+          - bat
+          - fd
+          - ripgrep
+          - fzf
+          - netcat-openbsd
+          - nmap
+          - iputils
+          - mtr
+          - curl
+          - wget
+          - git
+          - jq
+          - unzip
+          - tar
+        state: present
+      when: ansible_pkg_mgr == "apk"
+
+    # Create symlinks for Debian-based bat/fd naming
+    - name: Create ~/.local/bin directory
+      file:
+        path: "{{ local_bin }}"
+        state: directory
+        mode: '0755'
+
+    - name: Create bat symlink (if batcat exists)
+      file:
+        src: /usr/bin/batcat
+        dest: "{{ local_bin }}/bat"
+        state: link
+      when: ansible_pkg_mgr == "apt"
+      ignore_errors: yes
+
+    - name: Create fd symlink (if fdfind exists)
+      file:
+        src: /usr/bin/fdfind
+        dest: "{{ local_bin }}/fd"
+        state: link
+      when: ansible_pkg_mgr == "apt"
+      ignore_errors: yes
+
+    # Install Neovim from official release
+    - name: Check if Neovim is installed
+      command: which nvim
+      register: nvim_check
+      failed_when: false
+      changed_when: false
+
+    - name: Install Neovim from official release
+      block:
+        - name: Determine Neovim architecture
+          set_fact:
+            nvim_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
+
+        - name: Create temporary directory for Neovim
+          tempfile:
+            state: directory
+          register: nvim_temp
+
+        - name: Download Neovim tarball
+          get_url:
+            url: "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-{{ nvim_arch }}.tar.gz"
+            dest: "{{ nvim_temp.path }}/nvim.tar.gz"
+            mode: '0644'
+
+        - name: Create Neovim installation directory
+          file:
+            path: "{{ local_share }}/nvim-linux-{{ nvim_arch }}"
+            state: directory
+            mode: '0755'
+
+        - name: Extract Neovim
+          unarchive:
+            src: "{{ nvim_temp.path }}/nvim.tar.gz"
+            dest: "{{ local_share }}"
+            remote_src: yes
+
+        - name: Create Neovim symlink
+          file:
+            src: "{{ local_share }}/nvim-linux-{{ nvim_arch }}/bin/nvim"
+            dest: "{{ local_bin }}/nvim"
+            state: link
+
+        - name: Clean up temporary directory
+          file:
+            path: "{{ nvim_temp.path }}"
+            state: absent
+
+        - name: Setup Neovim plugins
+          command: "{{ local_bin }}/nvim --headless '+Lazy! sync' '+TSUpdate' +qa"
+          ignore_errors: yes
+          changed_when: false
+      when: nvim_check.rc != 0
+
+    # Install gping
+    - name: Check if gping is installed
+      command: which gping
+      register: gping_check
+      failed_when: false
+      changed_when: false
+
+    - name: Install gping
+      block:
+        - name: Set gping architecture
+          set_fact:
+            gping_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
+
+        - name: Create temporary directory for gping
+          tempfile:
+            state: directory
+          register: gping_temp
+
+        - name: Download gping
+          get_url:
+            url: "https://github.com/orf/gping/releases/download/gping-v1.20.1/gping-Linux-musl-{{ gping_arch }}.tar.gz"
+            dest: "{{ gping_temp.path }}/gping.tar.gz"
+            mode: '0644'
+
+        - name: Extract gping
+          unarchive:
+            src: "{{ gping_temp.path }}/gping.tar.gz"
+            dest: "{{ gping_temp.path }}"
+            remote_src: yes
+
+        - name: Install gping binary
+          shell: |
+            cd "{{ gping_temp.path }}"
+            gping_binary=$(find . -name 'gping' -type f | head -n 1)
+            if [ -n "$gping_binary" ]; then
+              cp "$gping_binary" "{{ local_bin }}/gping"
+              chmod 755 "{{ local_bin }}/gping"
+            else
+              echo "ERROR: gping binary not found in extracted archive"
+              exit 1
+            fi
+          args:
+            creates: "{{ local_bin }}/gping"
+
+        - name: Clean up temporary directory
+          file:
+            path: "{{ gping_temp.path }}"
+            state: absent
+
+        - name: Display gping capabilities note
+          debug:
+            msg: "ℹ️  gping may require elevated privileges. If needed, run: sudo setcap cap_net_raw+ep $(which gping)"
+      when: gping_check.rc != 0
+
+    # Install trippy
+    - name: Check if trippy is installed
+      command: which trip
+      register: trippy_check
+      failed_when: false
+      changed_when: false
+
+    - name: Install trippy
+      block:
+        - name: Set trippy architecture
+          set_fact:
+            trippy_arch: "{{ 'aarch64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
+            trippy_libc: "{{ 'musl' if ansible_pkg_mgr == 'apk' else 'gnu' }}"
+
+        - name: Create temporary directory for trippy
+          tempfile:
+            state: directory
+          register: trippy_temp
+
+        - name: Download trippy
+          get_url:
+            url: "https://github.com/fujiapple852/trippy/releases/download/0.13.0/trippy-0.13.0-{{ trippy_arch }}-unknown-linux-{{ trippy_libc }}.tar.gz"
+            dest: "{{ trippy_temp.path }}/trippy.tar.gz"
+            mode: '0644'
+
+        - name: Extract trippy
+          unarchive:
+            src: "{{ trippy_temp.path }}/trippy.tar.gz"
+            dest: "{{ trippy_temp.path }}"
+            remote_src: yes
+
+        - name: Install trippy binary
+          shell: |
+            cd "{{ trippy_temp.path }}"
+            trip_binary=$(find . -name 'trip' -type f | head -n 1)
+            if [ -n "$trip_binary" ]; then
+              cp "$trip_binary" "{{ local_bin }}/trip"
+              chmod 755 "{{ local_bin }}/trip"
+            else
+              echo "ERROR: trip binary not found in extracted archive"
+              exit 1
+            fi
+          args:
+            creates: "{{ local_bin }}/trip"
+
+        - name: Clean up temporary directory
+          file:
+            path: "{{ trippy_temp.path }}"
+            state: absent
+
+        - name: Display trippy capabilities note
+          debug:
+            msg: "ℹ️  trippy may require elevated privileges. If needed, run: sudo setcap cap_net_raw+ep $(which trip)"
+      when: trippy_check.rc != 0
+
+    # Install eza (modern ls replacement)
+    - name: Check if eza is installed
+      command: which eza
+      register: eza_check
+      failed_when: false
+      changed_when: false
+
+    - name: Install eza
+      block:
+        - name: Create temporary directory for eza
+          tempfile:
+            state: directory
+          register: eza_temp
+
+        - name: Download eza
+          get_url:
+            url: "https://github.com/eza-community/eza/releases/latest/download/eza_{{ ansible_architecture }}-unknown-linux-musl.tar.gz"
+            dest: "{{ eza_temp.path }}/eza.tar.gz"
+            mode: '0644'
+
+        - name: Extract eza
+          unarchive:
+            src: "{{ eza_temp.path }}/eza.tar.gz"
+            dest: "{{ eza_temp.path }}"
+            remote_src: yes
+
+        - name: Find and install eza binary
+          shell: |
+            cd "{{ eza_temp.path }}"
+            eza_binary=$(find . -name 'eza' -type f | head -n 1)
+            if [ -n "$eza_binary" ]; then
+              cp "$eza_binary" "{{ local_bin }}/eza"
+              chmod 755 "{{ local_bin }}/eza"
+            else
+              echo "ERROR: eza binary not found in extracted archive"
+              exit 1
+            fi
+          args:
+            creates: "{{ local_bin }}/eza"
+
+        - name: Clean up temporary directory
+          file:
+            path: "{{ eza_temp.path }}"
+            state: absent
+      when: eza_check.rc != 0
+
+    # Install starship prompt
+    - name: Check if starship is installed
+      command: which starship
+      register: starship_check
+      failed_when: false
+      changed_when: false
+
+    - name: Install starship
+      block:
+        - name: Download and install starship
+          shell: "curl -sS https://starship.rs/install.sh | sh -s -- --bin-dir={{ local_bin }} -y"
+          args:
+            creates: "{{ local_bin }}/starship"
+      when: starship_check.rc != 0
+
+    # Completion message
+    - name: Display installation completion
+      debug:
+        msg: "✅ Installation complete! Tools installed to {{ local_bin }}"
+

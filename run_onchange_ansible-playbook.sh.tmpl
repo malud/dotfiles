@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+{{ if ne .chezmoi.os "darwin" -}}
+set -euo pipefail
+
+# Hash: {{ include "dot_config/ansible.os.linux/playbook.yml" | sha256sum }}
+
+echo "🚀 Running Ansible playbook..."
+
+# Verify Ansible is installed
+if ! command -v ansible-playbook &>/dev/null; then
+  echo "❌ Ansible not found. Please run the install-ansible script first."
+  exit 1
+fi
+
+# Run the playbook
+cd "${HOME}/.config/ansible"
+ansible-playbook playbook.yml
+
+echo "✅ Ansible playbook completed!"
+
+{{ else -}}
+echo "ℹ️  This script is for Linux only - skipping on macOS"
+exit 0
+{{ end -}}
+

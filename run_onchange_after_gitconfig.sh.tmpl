@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Hash: {{ include "dot_gitconfig.tmpl" | sha256sum }}
+
+echo "📝 Git configuration updated"
+
+# Verify git config is valid
+if git config --list --show-origin &>/dev/null; then
+  echo "✅ Git configuration is valid"
+else
+  echo "⚠️  Warning: Git configuration may have issues"
+  exit 1
+fi
+
+# Display key settings
+echo "ℹ️  Git user: $(git config user.name) <$(git config user.email)>"
+echo "ℹ️  Default branch: $(git config init.defaultBranch)"
+echo "ℹ️  GPG signing: $(git config commit.gpgsign)"
+

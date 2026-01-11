@@ -2,6 +2,8 @@
 {{ if eq .chezmoi.os "darwin" -}}
 set -euo pipefail
 
+# Hash: {{ include "dot_Brewfile.tmpl" | sha256sum }}
+
 echo "🔄 Updating Homebrew and packages..."
 
 # Ensure Homebrew is in PATH

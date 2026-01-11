@@ -38,10 +38,11 @@ That's it! Packages install automatically using the best method for your platfor
 - Nerd Fonts, Ghostty, Docker Desktop, and more
 
 **Linux:**
+- **Ansible-based** declarative tool management
 - Essential tools via native package manager (apt/dnf/yum/apk)
-- Modern CLI tools: eza, bat, fd, ripgrep, zoxide, fzf
-- Development tools: neovim, tmux, git, jq, yq
-- Cloud/Kubernetes: kubectl, helm, k9s
+- Modern CLI tools: eza, bat, fd, ripgrep, fzf, gping, trippy
+- Development tools: neovim (with Lazy.nvim), git, jq
+- Network utilities: netcat, nmap, mtr
 - Starship prompt via official installer
 - kubectl krew plugins (if kubectl available)
 - devpod docker provider (if devpod available)

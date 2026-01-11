@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+{{ if ne .chezmoi.os "darwin" -}}
+set -euo pipefail
+
+echo "📦 Installing Ansible..."
+
+# Check if Ansible is already installed
+if command -v ansible-playbook &>/dev/null; then
+  echo "✅ Ansible already installed ($(ansible --version | head -n1))"
+  exit 0
+fi
+
+# Detect package manager
+if command -v apt-get &>/dev/null; then
+  PKG_MGR="apt"
+elif command -v dnf &>/dev/null; then
+  PKG_MGR="dnf"
+elif command -v yum &>/dev/null; then
+  PKG_MGR="yum"
+elif command -v apk &>/dev/null; then
+  PKG_MGR="apk"
+elif command -v pacman &>/dev/null; then
+  PKG_MGR="pacman"
+else
+  echo "❌ No supported package manager found"
+  exit 1
+fi
+
+# Determine if we need sudo
+USE_SUDO=""
+if [ "$(id -u)" -ne 0 ] && command -v sudo &>/dev/null; then
+  USE_SUDO="sudo"
+fi
+
+# Install Ansible based on package manager
+case "$PKG_MGR" in
+  apt)
+    echo "📦 Using apt-get to install Ansible..."
+    $USE_SUDO apt-get update
+    $USE_SUDO apt-get install -y ansible
+    ;;
+  dnf)
+    echo "📦 Using dnf to install Ansible..."
+    $USE_SUDO dnf install -y ansible
+    ;;
+  yum)
+    echo "📦 Using yum to install Ansible..."
+    $USE_SUDO yum install -y epel-release
+    $USE_SUDO yum install -y ansible
+    ;;
+  apk)
+    echo "📦 Using apk to install Ansible..."
+    $USE_SUDO apk add --no-cache ansible
+    ;;
+  pacman)
+    echo "📦 Using pacman to install Ansible..."
+    $USE_SUDO pacman -Sy --noconfirm ansible
+    ;;
+  *)
+    echo "❌ Unsupported package manager: $PKG_MGR"
+    exit 1
+    ;;
+esac
+
+# Verify installation
+if command -v ansible-playbook &>/dev/null; then
+  echo "✅ Ansible installed successfully!"
+  ansible --version | head -n1
+else
+  echo "❌ Ansible installation failed"
+  exit 1
+fi
+
+{{ else -}}
+echo "ℹ️  This script is for Linux only - skipping on macOS"
+exit 0
+{{ end -}}
+
