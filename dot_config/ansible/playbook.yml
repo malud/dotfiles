@@ -275,6 +275,11 @@
 
     - name: Install eza
       block:
+        - name: Set eza architecture and libc variant
+          set_fact:
+            eza_arch: "{{ 'aarch64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
+            eza_libc: "{{ 'gnu' if ansible_architecture == 'aarch64' else 'musl' }}"
+
         - name: Create temporary directory for eza
           tempfile:
             state: directory
@@ -282,7 +287,7 @@
 
         - name: Download eza
           get_url:
-            url: "https://github.com/eza-community/eza/releases/latest/download/eza_{{ ansible_architecture }}-unknown-linux-musl.tar.gz"
+            url: "https://github.com/eza-community/eza/releases/latest/download/eza_{{ eza_arch }}-unknown-linux-{{ eza_libc }}.tar.gz"
             dest: "{{ eza_temp.path }}/eza.tar.gz"
             mode: '0644'
 
