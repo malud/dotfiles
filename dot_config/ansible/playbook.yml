@@ -332,6 +332,130 @@
             creates: "{{ local_bin }}/starship"
       when: starship_check.rc != 0
 
+    # Install kubectl
+    - name: Check if kubectl is installed
+      command: which kubectl
+      register: kubectl_check
+      failed_when: false
+      changed_when: false
+
+    - name: Install kubectl
+      block:
+        - name: Set kubectl architecture
+          set_fact:
+            kubectl_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+
+        - name: Download kubectl
+          get_url:
+            url: "https://dl.k8s.io/release/{{ lookup('url', 'https://dl.k8s.io/release/stable.txt') }}/bin/linux/{{ kubectl_arch }}/kubectl"
+            dest: "{{ local_bin }}/kubectl"
+            mode: '0755'
+
+        - name: Verify kubectl installation
+          command: "{{ local_bin }}/kubectl version --client"
+          changed_when: false
+      when: kubectl_check.rc != 0
+
+    # Install kustomize
+    - name: Check if kustomize is installed
+      command: which kustomize
+      register: kustomize_check
+      failed_when: false
+      changed_when: false
+
+    - name: Install kustomize
+      block:
+        - name: Create temporary directory for kustomize
+          tempfile:
+            state: directory
+          register: kustomize_temp
+
+        - name: Set kustomize architecture
+          set_fact:
+            kustomize_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+
+        - name: Download kustomize
+          get_url:
+            url: "https://github.com/kubernetes-sigs/kustomize/releases/latest/download/kustomize_v5.6.0_linux_{{ kustomize_arch }}.tar.gz"
+            dest: "{{ kustomize_temp.path }}/kustomize.tar.gz"
+            mode: '0644'
+
+        - name: Extract kustomize
+          unarchive:
+            src: "{{ kustomize_temp.path }}/kustomize.tar.gz"
+            dest: "{{ kustomize_temp.path }}"
+            remote_src: yes
+
+        - name: Install kustomize binary
+          shell: |
+            cd "{{ kustomize_temp.path }}"
+            kustomize_binary=$(find . -name 'kustomize' -type f | head -n 1)
+            if [ -n "$kustomize_binary" ]; then
+              cp "$kustomize_binary" "{{ local_bin }}/kustomize"
+              chmod 755 "{{ local_bin }}/kustomize"
+            else
+              echo "ERROR: kustomize binary not found in extracted archive"
+              exit 1
+            fi
+          args:
+            creates: "{{ local_bin }}/kustomize"
+
+        - name: Clean up temporary directory
+          file:
+            path: "{{ kustomize_temp.path }}"
+            state: absent
+      when: kustomize_check.rc != 0
+
+    # Install k9s
+    - name: Check if k9s is installed
+      command: which k9s
+      register: k9s_check
+      failed_when: false
+      changed_when: false
+
+    - name: Install k9s
+      block:
+        - name: Create temporary directory for k9s
+          tempfile:
+            state: directory
+          register: k9s_temp
+
+        - name: Set k9s architecture
+          set_fact:
+            k9s_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+
+        - name: Download k9s
+          get_url:
+            url: "https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_{{ k9s_arch }}.tar.gz"
+            dest: "{{ k9s_temp.path }}/k9s.tar.gz"
+            mode: '0644'
+
+        - name: Extract k9s
+          unarchive:
+            src: "{{ k9s_temp.path }}/k9s.tar.gz"
+            dest: "{{ k9s_temp.path }}"
+            remote_src: yes
+
+        - name: Install k9s binary
+          shell: |
+            cd "{{ k9s_temp.path }}"
+            k9s_binary=$(find . -name 'k9s' -type f | head -n 1)
+            if [ -n "$k9s_binary" ]; then
+              cp "$k9s_binary" "{{ local_bin }}/k9s"
+              chmod 755 "{{ local_bin }}/k9s"
+            else
+              echo "ERROR: k9s binary not found in extracted archive"
+              exit 1
+            fi
+          args:
+            creates: "{{ local_bin }}/k9s"
+
+        - name: Clean up temporary directory
+          file:
+            path: "{{ k9s_temp.path }}"
+            state: absent
+      when: k9s_check.rc != 0
+
     # Completion message
     - name: Display installation completion
       debug:
