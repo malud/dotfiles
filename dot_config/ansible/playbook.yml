@@ -345,11 +345,23 @@
           set_fact:
             kubectl_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
 
+        - name: Get stable kubectl version
+          uri:
+            url: https://dl.k8s.io/release/stable.txt
+            return_content: yes
+            timeout: 120
+          register: kubectl_version
+          retries: 3
+          delay: 5
+
         - name: Download kubectl
           get_url:
-            url: "https://dl.k8s.io/release/{{ lookup('url', 'https://dl.k8s.io/release/stable.txt') }}/bin/linux/{{ kubectl_arch }}/kubectl"
+            url: "https://dl.k8s.io/release/{{ kubectl_version.content | trim }}/bin/linux/{{ kubectl_arch }}/kubectl"
             dest: "{{ local_bin }}/kubectl"
             mode: '0755'
+            timeout: 180
+          retries: 3
+          delay: 5
 
         - name: Verify kubectl installation
           command: "{{ local_bin }}/kubectl version --client"
@@ -429,6 +441,9 @@
             url: "https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_{{ k9s_arch }}.tar.gz"
             dest: "{{ k9s_temp.path }}/k9s.tar.gz"
             mode: '0644'
+            timeout: 120
+          retries: 3
+          delay: 5
 
         - name: Extract k9s
           unarchive:
