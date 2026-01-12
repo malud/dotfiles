@@ -386,11 +386,27 @@
           set_fact:
             kustomize_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
 
+        - name: Get latest kustomize version
+          uri:
+            url: https://api.github.com/repos/kubernetes-sigs/kustomize/releases/latest
+            return_content: yes
+            timeout: 120
+          register: kustomize_release
+          retries: 3
+          delay: 5
+
+        - name: Set kustomize version
+          set_fact:
+            kustomize_version: "{{ (kustomize_release.content | from_json).tag_name | regex_replace('^kustomize/', '') }}"
+
         - name: Download kustomize
           get_url:
-            url: "https://github.com/kubernetes-sigs/kustomize/releases/latest/download/kustomize_v5.6.0_linux_{{ kustomize_arch }}.tar.gz"
+            url: "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/{{ kustomize_version }}/kustomize_{{ kustomize_version }}_linux_{{ kustomize_arch }}.tar.gz"
             dest: "{{ kustomize_temp.path }}/kustomize.tar.gz"
             mode: '0644'
+            timeout: 120
+          retries: 3
+          delay: 5
 
         - name: Extract kustomize
           unarchive:
