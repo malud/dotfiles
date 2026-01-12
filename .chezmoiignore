@@ -1,7 +1,9 @@
 README.md
 LICENSE
 
-{{ if ne .chezmoi.os "darwin" }}
+{{ if eq .chezmoi.os "darwin" }}
+.config/ansible
+{{ else }}
 .config/ghostty
 {{ end }}
 

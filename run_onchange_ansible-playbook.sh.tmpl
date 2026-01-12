@@ -2,7 +2,7 @@
 {{ if ne .chezmoi.os "darwin" -}}
 set -euo pipefail
 
-# Hash: {{ include "dot_config/ansible.os.linux/playbook.yml" | sha256sum }}
+# Hash: {{ include "dot_config/ansible/playbook.yml" | sha256sum }}
 
 echo "🚀 Running Ansible playbook..."
 
