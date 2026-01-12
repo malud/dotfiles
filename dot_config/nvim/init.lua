@@ -181,10 +181,15 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
--- Remove trailing whitespace on save
+-- Remove trailing whitespace on save (except for git commits and markdown)
 vim.api.nvim_create_autocmd('BufWritePre', {
   pattern = '*',
   callback = function()
+    -- Skip for git commit messages and certain filetypes
+    local ft = vim.bo.filetype
+    if ft == 'gitcommit' or ft == 'gitrebase' or ft == 'markdown' then
+      return
+    end
     local save_cursor = vim.fn.getpos('.')
     vim.cmd([[%s/\s\+$//e]])
     vim.fn.setpos('.', save_cursor)
