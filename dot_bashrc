@@ -232,4 +232,7 @@ fi
 # devpod auto completion
 if command -v devpod &>/dev/null; then
   eval "$(devpod completion bash)"
+
+  # Stop all running DevPod workspaces (fixes port conflicts)
+  alias dpstopall='devpod list --output json | jq -r ".[] | select(.state == \"Running\") | .id" | xargs -I {} devpod stop {}'
 fi
