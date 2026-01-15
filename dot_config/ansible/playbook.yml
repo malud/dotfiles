@@ -105,11 +105,26 @@
       ignore_errors: yes
 
     # Install Neovim from official release
-    - name: Check if Neovim is installed
-      command: which nvim
+    - name: Check if Neovim is installed in ~/.local/bin
+      stat:
+        path: "{{ local_bin }}/nvim"
       register: nvim_check
+
+    - name: Check if system Neovim exists
+      command: which nvim
+      register: system_nvim_check
       failed_when: false
       changed_when: false
+      when: not nvim_check.stat.exists
+
+    - name: Create symlink to system Neovim if present
+      file:
+        src: "{{ system_nvim_check.stdout }}"
+        dest: "{{ local_bin }}/nvim"
+        state: link
+      when:
+        - not nvim_check.stat.exists
+        - system_nvim_check.rc == 0
 
     - name: Install Neovim from official release
       block:
@@ -155,14 +170,31 @@
           command: "{{ local_bin }}/nvim --headless '+Lazy! sync' '+TSUpdate' +qa"
           ignore_errors: yes
           changed_when: false
-      when: nvim_check.rc != 0
+      when:
+        - not nvim_check.stat.exists
+        - system_nvim_check.rc != 0
 
     # Install gping
-    - name: Check if gping is installed
-      command: which gping
+    - name: Check if gping is installed in ~/.local/bin
+      stat:
+        path: "{{ local_bin }}/gping"
       register: gping_check
+
+    - name: Check if system gping exists
+      command: which gping
+      register: system_gping_check
       failed_when: false
       changed_when: false
+      when: not gping_check.stat.exists
+
+    - name: Create symlink to system gping if present
+      file:
+        src: "{{ system_gping_check.stdout }}"
+        dest: "{{ local_bin }}/gping"
+        state: link
+      when:
+        - not gping_check.stat.exists
+        - system_gping_check.rc == 0
 
     - name: Install gping
       block:
@@ -209,14 +241,31 @@
         - name: Display gping capabilities note
           debug:
             msg: "ℹ️  gping may require elevated privileges. If needed, run: sudo setcap cap_net_raw+ep $(which gping)"
-      when: gping_check.rc != 0
+      when:
+        - not gping_check.stat.exists
+        - system_gping_check.rc != 0
 
     # Install trippy
-    - name: Check if trippy is installed
-      command: which trip
+    - name: Check if trippy is installed in ~/.local/bin
+      stat:
+        path: "{{ local_bin }}/trip"
       register: trippy_check
+
+    - name: Check if system trippy exists
+      command: which trip
+      register: system_trippy_check
       failed_when: false
       changed_when: false
+      when: not trippy_check.stat.exists
+
+    - name: Create symlink to system trippy if present
+      file:
+        src: "{{ system_trippy_check.stdout }}"
+        dest: "{{ local_bin }}/trip"
+        state: link
+      when:
+        - not trippy_check.stat.exists
+        - system_trippy_check.rc == 0
 
     - name: Install trippy
       block:
@@ -264,14 +313,31 @@
         - name: Display trippy capabilities note
           debug:
             msg: "ℹ️  trippy may require elevated privileges. If needed, run: sudo setcap cap_net_raw+ep $(which trip)"
-      when: trippy_check.rc != 0
+      when:
+        - not trippy_check.stat.exists
+        - system_trippy_check.rc != 0
 
     # Install eza (modern ls replacement)
-    - name: Check if eza is installed
-      command: which eza
+    - name: Check if eza is installed in ~/.local/bin
+      stat:
+        path: "{{ local_bin }}/eza"
       register: eza_check
+
+    - name: Check if system eza exists
+      command: which eza
+      register: system_eza_check
       failed_when: false
       changed_when: false
+      when: not eza_check.stat.exists
+
+    - name: Create symlink to system eza if present
+      file:
+        src: "{{ system_eza_check.stdout }}"
+        dest: "{{ local_bin }}/eza"
+        state: link
+      when:
+        - not eza_check.stat.exists
+        - system_eza_check.rc == 0
 
     - name: Install eza
       block:
@@ -315,14 +381,31 @@
           file:
             path: "{{ eza_temp.path }}"
             state: absent
-      when: eza_check.rc != 0
+      when:
+        - not eza_check.stat.exists
+        - system_eza_check.rc != 0
 
     # Install starship prompt
-    - name: Check if starship is installed
-      command: which starship
+    - name: Check if starship is installed in ~/.local/bin
+      stat:
+        path: "{{ local_bin }}/starship"
       register: starship_check
+
+    - name: Check if system starship exists
+      command: which starship
+      register: system_starship_check
       failed_when: false
       changed_when: false
+      when: not starship_check.stat.exists
+
+    - name: Create symlink to system starship if present
+      file:
+        src: "{{ system_starship_check.stdout }}"
+        dest: "{{ local_bin }}/starship"
+        state: link
+      when:
+        - not starship_check.stat.exists
+        - system_starship_check.rc == 0
 
     - name: Install starship
       block:
@@ -330,14 +413,31 @@
           shell: "curl -sS https://starship.rs/install.sh | sh -s -- --bin-dir={{ local_bin }} -y"
           args:
             creates: "{{ local_bin }}/starship"
-      when: starship_check.rc != 0
+      when:
+        - not starship_check.stat.exists
+        - system_starship_check.rc != 0
 
     # Install kubectl
-    - name: Check if kubectl is installed
-      command: which kubectl
+    - name: Check if kubectl is installed in ~/.local/bin
+      stat:
+        path: "{{ local_bin }}/kubectl"
       register: kubectl_check
+
+    - name: Check if system kubectl exists
+      command: which kubectl
+      register: system_kubectl_check
       failed_when: false
       changed_when: false
+      when: not kubectl_check.stat.exists
+
+    - name: Create symlink to system kubectl if present
+      file:
+        src: "{{ system_kubectl_check.stdout }}"
+        dest: "{{ local_bin }}/kubectl"
+        state: link
+      when:
+        - not kubectl_check.stat.exists
+        - system_kubectl_check.rc == 0
 
     - name: Install kubectl
       block:
@@ -366,7 +466,9 @@
         - name: Verify kubectl installation
           command: "{{ local_bin }}/kubectl version --client"
           changed_when: false
-      when: kubectl_check.rc != 0
+      when:
+        - not kubectl_check.stat.exists
+        - system_kubectl_check.rc != 0
 
     # Install krew (kubectl plugin manager)
     - name: Check if krew is installed
@@ -374,7 +476,7 @@
       register: krew_check
       failed_when: false
       changed_when: false
-      when: kubectl_check.rc == 0 or (kubectl_check.rc != 0 and kubectl_check is changed)
+      when: kubectl_check.stat.exists
 
     - name: Install krew
       block:
@@ -421,14 +523,29 @@
           file:
             path: "{{ krew_temp.path }}"
             state: absent
-      when: krew_check.rc != 0 and kubectl_check.rc == 0
+      when: krew_check.rc != 0 and kubectl_check.stat.exists
 
     # Install kustomize
-    - name: Check if kustomize is installed
-      command: which kustomize
+    - name: Check if kustomize is installed in ~/.local/bin
+      stat:
+        path: "{{ local_bin }}/kustomize"
       register: kustomize_check
+
+    - name: Check if system kustomize exists
+      command: which kustomize
+      register: system_kustomize_check
       failed_when: false
       changed_when: false
+      when: not kustomize_check.stat.exists
+
+    - name: Create symlink to system kustomize if present
+      file:
+        src: "{{ system_kustomize_check.stdout }}"
+        dest: "{{ local_bin }}/kustomize"
+        state: link
+      when:
+        - not kustomize_check.stat.exists
+        - system_kustomize_check.rc == 0
 
     - name: Install kustomize
       block:
@@ -487,14 +604,31 @@
           file:
             path: "{{ kustomize_temp.path }}"
             state: absent
-      when: kustomize_check.rc != 0
+      when:
+        - not kustomize_check.stat.exists
+        - system_kustomize_check.rc != 0
 
     # Install k9s
-    - name: Check if k9s is installed
-      command: which k9s
+    - name: Check if k9s is installed in ~/.local/bin
+      stat:
+        path: "{{ local_bin }}/k9s"
       register: k9s_check
+
+    - name: Check if system k9s exists
+      command: which k9s
+      register: system_k9s_check
       failed_when: false
       changed_when: false
+      when: not k9s_check.stat.exists
+
+    - name: Create symlink to system k9s if present
+      file:
+        src: "{{ system_k9s_check.stdout }}"
+        dest: "{{ local_bin }}/k9s"
+        state: link
+      when:
+        - not k9s_check.stat.exists
+        - system_k9s_check.rc == 0
 
     - name: Install k9s
       block:
@@ -540,7 +674,9 @@
           file:
             path: "{{ k9s_temp.path }}"
             state: absent
-      when: k9s_check.rc != 0
+      when:
+        - not k9s_check.stat.exists
+        - system_k9s_check.rc != 0
 
     # Completion message
     - name: Display installation completion
