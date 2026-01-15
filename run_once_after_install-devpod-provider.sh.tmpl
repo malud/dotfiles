@@ -1,5 +1,6 @@
+{{ if eq .chezmoi.os "darwin" -}}
 #!/usr/bin/env bash
-# Install devpod docker provider
+# Install devpod docker provider (macOS only)
 
 set -e
 
@@ -33,4 +34,4 @@ devpod ide use "$DEFAULT_IDE"
 echo "✓ devpod configured (telemetry disabled, IDE: $DEFAULT_IDE)"
 echo "ℹ️  Use 'devpod up --ide goland' to override IDE per workspace"
 
-
+{{ end -}}

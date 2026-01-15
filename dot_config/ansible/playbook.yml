@@ -368,6 +368,61 @@
           changed_when: false
       when: kubectl_check.rc != 0
 
+    # Install krew (kubectl plugin manager)
+    - name: Check if krew is installed
+      command: "{{ local_bin }}/kubectl-krew"
+      register: krew_check
+      failed_when: false
+      changed_when: false
+      when: kubectl_check.rc == 0 or (kubectl_check.rc != 0 and kubectl_check is changed)
+
+    - name: Install krew
+      block:
+        - name: Create temporary directory for krew
+          tempfile:
+            state: directory
+          register: krew_temp
+
+        - name: Set krew architecture
+          set_fact:
+            krew_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+
+        - name: Download krew installer
+          get_url:
+            url: "https://github.com/kubernetes-sigs/krew/releases/latest/download/krew-linux_{{ krew_arch }}.tar.gz"
+            dest: "{{ krew_temp.path }}/krew.tar.gz"
+            mode: '0644'
+            timeout: 120
+          retries: 3
+          delay: 5
+
+        - name: Extract krew
+          unarchive:
+            src: "{{ krew_temp.path }}/krew.tar.gz"
+            dest: "{{ krew_temp.path }}"
+            remote_src: yes
+
+        - name: Install krew
+          shell: |
+            cd "{{ krew_temp.path }}"
+            KREW="{{ krew_temp.path }}/krew-linux_{{ krew_arch }}"
+            "$KREW" install krew
+          environment:
+            KREW_ROOT: "{{ ansible_env.HOME }}/.krew"
+          changed_when: true
+
+        - name: Create symlink for krew in local bin
+          file:
+            src: "{{ ansible_env.HOME }}/.krew/bin/kubectl-krew"
+            dest: "{{ local_bin }}/kubectl-krew"
+            state: link
+
+        - name: Clean up temporary directory
+          file:
+            path: "{{ krew_temp.path }}"
+            state: absent
+      when: krew_check.rc != 0 and kubectl_check.rc == 0
+
     # Install kustomize
     - name: Check if kustomize is installed
       command: which kustomize

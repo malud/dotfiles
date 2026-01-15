@@ -36,6 +36,7 @@ That's it! Packages install automatically using the best method for your platfor
 - Homebrew (if not present)
 - All packages from Brewfile (60+ formulae, 6+ casks)
 - Nerd Fonts, Ghostty, Docker Desktop, and more
+- devpod docker provider configuration
 
 **Linux:**
 - **Ansible-based** declarative tool management
@@ -43,9 +44,8 @@ That's it! Packages install automatically using the best method for your platfor
 - Modern CLI tools: eza, bat, fd, ripgrep, fzf, gping, trippy
 - Development tools: neovim (with Lazy.nvim), git, jq
 - Network utilities: netcat, nmap, mtr
+- Kubernetes tools: kubectl, krew, k9s, kustomize (with oidc-login plugin)
 - Starship prompt via official installer
-- kubectl krew plugins (if kubectl available)
-- devpod docker provider (if devpod available)
 
 ### Manual Preview (Optional)
 

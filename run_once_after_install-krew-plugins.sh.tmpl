@@ -13,7 +13,7 @@ fi
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
 # Wait a moment for krew to be available (in case it was just installed)
-sleep 1
+sleep 2
 
 if ! command -v kubectl-krew &>/dev/null; then
   echo "⚠️  krew not found, skipping plugin installation"
