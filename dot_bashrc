@@ -193,6 +193,22 @@ git_prune_local() {
 }
 alias git-prune-local=git_prune_local
 
+# Ralph loop - endless claude-code execution
+# Usage: ralph [max_turns] < prompt.md
+# Examples:
+#   ralph < prompt.md       # Run forever, 25 turns per iteration (default)
+#   ralph 50 < prompt.md    # Run forever, 50 turns per iteration
+ralph() {
+  local prompt max_turns
+  prompt=$(cat)
+  max_turns=${1:-25}
+
+  while true; do
+    echo "$prompt" | claude -p --dangerously-skip-permissions --max-turns "$max_turns" -
+    sleep 1
+  done
+}
+
 # Zoxide (smarter cd)
 if command -v zoxide &>/dev/null; then
   eval "$(zoxide init bash)"
