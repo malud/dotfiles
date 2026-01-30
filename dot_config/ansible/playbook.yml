@@ -7,6 +7,12 @@
   vars:
     local_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin"
     local_share: "{{ ansible_facts['env']['HOME'] }}/.local/share"
+    # Pinned versions to avoid GitHub API rate limits
+    gping_version: "1.20.1"
+    trippy_version: "0.13.0"
+    kustomize_version: "v5.8.0"
+    just_version: "1.46.0"
+    ali_version: "0.8.0"
 
   environment:
     DEBIAN_FRONTEND: noninteractive
@@ -208,7 +214,7 @@
 
         - name: Download gping
           get_url:
-            url: "https://github.com/orf/gping/releases/download/gping-v1.20.1/gping-Linux-musl-{{ gping_arch }}.tar.gz"
+            url: "https://github.com/orf/gping/releases/download/gping-v{{ gping_version }}/gping-Linux-musl-{{ gping_arch }}.tar.gz"
             dest: "{{ gping_temp.path }}/gping.tar.gz"
             mode: '0644'
 
@@ -280,7 +286,7 @@
 
         - name: Download trippy
           get_url:
-            url: "https://github.com/fujiapple852/trippy/releases/download/0.13.0/trippy-0.13.0-{{ trippy_arch }}-unknown-linux-{{ trippy_libc }}.tar.gz"
+            url: "https://github.com/fujiapple852/trippy/releases/download/{{ trippy_version }}/trippy-{{ trippy_version }}-{{ trippy_arch }}-unknown-linux-{{ trippy_libc }}.tar.gz"
             dest: "{{ trippy_temp.path }}/trippy.tar.gz"
             mode: '0644'
 
@@ -559,20 +565,6 @@
           set_fact:
             kustomize_arch: "{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"
 
-        - name: Get latest kustomize version
-          uri:
-            url: https://api.github.com/repos/kubernetes-sigs/kustomize/releases/latest
-            return_content: yes
-            timeout: 300
-          register: kustomize_release
-          retries: 5
-          delay: 10
-          until: kustomize_release.status == 200
-
-        - name: Set kustomize version
-          set_fact:
-            kustomize_version: "{{ (kustomize_release.content | from_json).tag_name | regex_replace('^kustomize/', '') }}"
-
         - name: Download kustomize
           get_url:
             url: "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/{{ kustomize_version }}/kustomize_{{ kustomize_version }}_linux_{{ kustomize_arch }}.tar.gz"
@@ -710,20 +702,6 @@
           set_fact:
             just_arch: "{{ 'aarch64' if ansible_facts['architecture'] == 'aarch64' else 'x86_64' }}"
 
-        - name: Get latest just version
-          uri:
-            url: https://api.github.com/repos/casey/just/releases/latest
-            return_content: yes
-            timeout: 300
-          register: just_release
-          retries: 5
-          delay: 10
-          until: just_release.status == 200
-
-        - name: Set just version
-          set_fact:
-            just_version: "{{ (just_release.content | from_json).tag_name }}"
-
         - name: Create temporary directory for just
           tempfile:
             state: directory
@@ -782,20 +760,6 @@
         - name: Set ali architecture
           set_fact:
             ali_arch: "{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"
-
-        - name: Get latest ali version
-          uri:
-            url: https://api.github.com/repos/nakabonne/ali/releases/latest
-            return_content: yes
-            timeout: 300
-          register: ali_release
-          retries: 5
-          delay: 10
-          until: ali_release.status == 200
-
-        - name: Set ali version
-          set_fact:
-            ali_version: "{{ (ali_release.content | from_json).tag_name | regex_replace('^v', '') }}"
 
         - name: Create temporary directory for ali
           tempfile:

@@ -1,0 +1,86 @@
+name: Check Pinned Versions
+
+on:
+  schedule:
+    - cron: '0 9 1 * *'  # 9 AM UTC on 1st of each month
+  workflow_dispatch:
+
+jobs:
+  check-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for updates
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          updates=""
+
+          check_version() {
+            local name="$1"
+            local repo="$2"
+            local current="$3"
+            local latest
+            latest=$(gh release view --repo "$repo" --json tagName -q '.tagName')
+
+            # Normalize versions for comparison (strip leading v if present)
+            current_normalized="${current#v}"
+            latest_normalized="${latest#v}"
+
+            if [[ "$current_normalized" != "$latest_normalized" ]]; then
+              echo "::warning::$name: $current -> $latest"
+              updates+="| $name | $current | $latest | [$repo](https://github.com/$repo/releases) |\n"
+            else
+              echo "$name: up to date ($current)"
+            fi
+          }
+
+          # Extract current versions from playbook
+          playbook="dot_config/ansible/playbook.yml"
+          gping_current=$(grep 'gping_version:' "$playbook" | sed 's/.*: *"\(.*\)"/\1/')
+          trippy_current=$(grep 'trippy_version:' "$playbook" | sed 's/.*: *"\(.*\)"/\1/')
+          kustomize_current=$(grep 'kustomize_version:' "$playbook" | sed 's/.*: *"\(.*\)"/\1/')
+          just_current=$(grep 'just_version:' "$playbook" | sed 's/.*: *"\(.*\)"/\1/')
+          ali_current=$(grep 'ali_version:' "$playbook" | sed 's/.*: *"\(.*\)"/\1/')
+
+          echo "Checking pinned versions..."
+          check_version "gping" "orf/gping" "gping-v$gping_current"
+          check_version "trippy" "fujiapple852/trippy" "$trippy_current"
+          check_version "kustomize" "kubernetes-sigs/kustomize" "$kustomize_current"
+          check_version "just" "casey/just" "$just_current"
+          check_version "ali" "nakabonne/ali" "$ali_current"
+
+          if [[ -n "$updates" ]]; then
+            echo "has_updates=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "updates<<EOF"
+              echo -e "$updates"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create issue for updates
+        if: steps.check.outputs.has_updates == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          existing=$(gh issue list --label "dependencies" --state open --json number -q '.[0].number')
+
+          body="The following pinned versions in \`dot_config/ansible/playbook.yml\` have updates available:
+
+          | Tool | Current | Latest | Releases |
+          |------|---------|--------|----------|
+          ${{ steps.check.outputs.updates }}
+
+          Update the versions in the \`vars\` section of the playbook."
+
+          if [[ -n "$existing" ]]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create \
+              --title "Update pinned tool versions" \
+              --body "$body" \
+              --label "dependencies"
+          fi
