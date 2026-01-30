@@ -14,7 +14,7 @@ test image="ubuntu:22.04" *args="":
         elif command -v apk >/dev/null; then \
             apk add --no-cache git curl sudo bash shadow; \
         fi && \
-        sh -c "$$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin && \
+        curl -fsLS get.chezmoi.io | sh -s -- -b /usr/local/bin && \
         useradd -m -s /bin/bash testuser && \
         cp -r /workspace /home/testuser/dotfiles && \
         chown -R testuser:testuser /home/testuser/dotfiles && \
