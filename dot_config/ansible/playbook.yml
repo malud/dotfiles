@@ -65,7 +65,7 @@
           - unzip
           - tar
         state: present
-      when: ansible_facts['pkg_mgr'] in ["dnf", "yum"]
+      when: ansible_facts['pkg_mgr'] in ["dnf", "dnf5", "yum"]
 
     - name: Install core CLI tools (apk)
       become: true
