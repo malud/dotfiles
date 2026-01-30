@@ -12,7 +12,6 @@
     DEBIAN_FRONTEND: noninteractive
 
   tasks:
-    # Update package cache
     - name: Update package cache (apt)
       become: true
       apt:
@@ -20,7 +19,6 @@
         cache_valid_time: 3600
       when: ansible_facts['pkg_mgr'] == "apt"
 
-    # Install core utilities via package manager
     - name: Install core CLI tools (apt)
       become: true
       apt:
@@ -84,13 +82,13 @@
         state: present
       when: ansible_facts['pkg_mgr'] == "apk"
 
-    # Create symlinks for Debian-based bat/fd naming
     - name: Create ~/.local/bin directory
       file:
         path: "{{ local_bin }}"
         state: directory
         mode: '0755'
 
+    # Debian names bat as batcat and fd as fdfind
     - name: Create bat symlink (if batcat exists)
       file:
         src: /usr/bin/batcat
@@ -107,7 +105,6 @@
       when: ansible_facts['pkg_mgr'] == "apt"
       ignore_errors: yes
 
-    # Install Neovim from official release
     - name: Check if Neovim is installed in ~/.local/bin
       stat:
         path: "{{ local_bin }}/nvim"
@@ -177,7 +174,6 @@
         - not nvim_check.stat.exists
         - system_nvim_check.rc != 0
 
-    # Install gping
     - name: Check if gping is installed in ~/.local/bin
       stat:
         path: "{{ local_bin }}/gping"
@@ -241,14 +237,14 @@
             path: "{{ gping_temp.path }}"
             state: absent
 
+        # May need: sudo setcap cap_net_raw+ep $(which gping)
         - name: Display gping capabilities note
           debug:
-            msg: "ℹ️  gping may require elevated privileges. If needed, run: sudo setcap cap_net_raw+ep $(which gping)"
+            msg: "gping may require elevated privileges for ICMP"
       when:
         - not gping_check.stat.exists
         - system_gping_check.rc != 0
 
-    # Install trippy
     - name: Check if trippy is installed in ~/.local/bin
       stat:
         path: "{{ local_bin }}/trip"
@@ -313,14 +309,14 @@
             path: "{{ trippy_temp.path }}"
             state: absent
 
+        # May need: sudo setcap cap_net_raw+ep $(which trip)
         - name: Display trippy capabilities note
           debug:
-            msg: "ℹ️  trippy may require elevated privileges. If needed, run: sudo setcap cap_net_raw+ep $(which trip)"
+            msg: "trippy may require elevated privileges for ICMP"
       when:
         - not trippy_check.stat.exists
         - system_trippy_check.rc != 0
 
-    # Install eza (modern ls replacement)
     - name: Check if eza is installed in ~/.local/bin
       stat:
         path: "{{ local_bin }}/eza"
@@ -344,6 +340,7 @@
 
     - name: Install eza
       block:
+        # arm64 only has gnu build, x86_64 has musl
         - name: Set eza architecture and libc variant
           set_fact:
             eza_arch: "{{ 'aarch64' if ansible_facts['architecture'] == 'aarch64' else 'x86_64' }}"
@@ -388,7 +385,6 @@
         - not eza_check.stat.exists
         - system_eza_check.rc != 0
 
-    # Install starship prompt
     - name: Check if starship is installed in ~/.local/bin
       stat:
         path: "{{ local_bin }}/starship"
@@ -420,7 +416,6 @@
         - not starship_check.stat.exists
         - system_starship_check.rc != 0
 
-    # Install kubectl
     - name: Check if kubectl is installed in ~/.local/bin
       stat:
         path: "{{ local_bin }}/kubectl"
@@ -476,7 +471,6 @@
         - not kubectl_check.stat.exists
         - system_kubectl_check.rc != 0
 
-    # Install krew (kubectl plugin manager)
     - name: Check if krew is installed
       command: "{{ local_bin }}/kubectl-krew"
       register: krew_check
@@ -533,7 +527,6 @@
             state: absent
       when: kubectl_check.stat.exists and (krew_check.rc | default(1)) != 0
 
-    # Install kustomize
     - name: Check if kustomize is installed in ~/.local/bin
       stat:
         path: "{{ local_bin }}/kustomize"
@@ -619,7 +612,6 @@
         - not kustomize_check.stat.exists
         - system_kustomize_check.rc != 0
 
-    # Install k9s
     - name: Check if k9s is installed in ~/.local/bin
       stat:
         path: "{{ local_bin }}/k9s"
@@ -691,7 +683,6 @@
         - not k9s_check.stat.exists
         - system_k9s_check.rc != 0
 
-    # Install just (command runner)
     - name: Check if just is installed in ~/.local/bin
       stat:
         path: "{{ local_bin }}/just"
@@ -765,7 +756,6 @@
         - not just_check.stat.exists
         - system_just_check.rc != 0
 
-    # Install ali (load testing tool)
     - name: Check if ali is installed in ~/.local/bin
       stat:
         path: "{{ local_bin }}/ali"
@@ -851,8 +841,6 @@
         - not ali_check.stat.exists
         - system_ali_check.rc != 0
 
-    # Completion message
     - name: Display installation completion
       debug:
-        msg: "✅ Installation complete! Tools installed to {{ local_bin }}"
-
+        msg: "Installation complete! Tools installed to {{ local_bin }}"

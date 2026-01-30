@@ -2,20 +2,17 @@
 {{ if ne .chezmoi.os "darwin" -}}
 set -euo pipefail
 
-# Hash: {{ include "dot_config/ansible/playbook.yml" | sha256sum }}
+# Hash triggers re-run when playbook changes: {{ include "dot_config/ansible/playbook.yml" | sha256sum }}
 
 echo "🚀 Running Ansible playbook..."
 
-# Ensure uv is in PATH
 export PATH="${HOME}/.local/bin:${PATH}"
 
-# Verify uv is installed
 if ! command -v uv &>/dev/null; then
   echo "❌ uv not found. Please run the install-uv script first."
   exit 1
 fi
 
-# Run the playbook via uvx (isolated, no system pollution)
 cd "${HOME}/.config/ansible"
 uvx --from ansible ansible-playbook playbook.yml
 
@@ -25,4 +22,3 @@ echo "✅ Ansible playbook completed!"
 echo "ℹ️  This script is for Linux only - skipping on macOS"
 exit 0
 {{ end -}}
-

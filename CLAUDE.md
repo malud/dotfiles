@@ -30,7 +30,7 @@ Chezmoi uses special prefixes for source files:
 
 **Platform-specific installation:**
 - **macOS**: `run_once_before_install-homebrew.sh.tmpl` installs Homebrew, `run_once_install-packages.sh.tmpl` runs `brew bundle`, `dot_Brewfile.tmpl` defines packages
-- **Linux**: `run_once_before_install-ansible.sh.tmpl` installs Ansible, `run_onchange_ansible-playbook.sh.tmpl` runs the playbook at `dot_config/ansible/playbook.yml`
+- **Linux**: `run_once_before_install-uv.sh.tmpl` installs uv, `run_onchange_ansible-playbook.sh.tmpl` runs Ansible via `uvx --from ansible` (keeps Python deps isolated from system)
 
 **Configuration hierarchy:**
 - `.chezmoi.toml.tmpl` → Prompts for user config (name, email, signing key) on init
@@ -73,6 +73,10 @@ This repository supports development inside devcontainers (VS Code Dev Container
 | `dot_config/ansible/playbook.yml` | `~/.config/ansible/playbook.yml` | Linux package installation |
 | `dot_config/nvim/init.lua` | `~/.config/nvim/init.lua` | Neovim config (lazy.nvim) |
 | `dot_config/starship.toml` | `~/.config/starship.toml` | Prompt configuration |
+
+## Code Style
+
+- **Comments**: Only for non-obvious logic or special knowledge (e.g., why Debian names bat as batcat, ICMP capability requirements). Avoid comments that merely describe what code does.
 
 ## Theme
 
