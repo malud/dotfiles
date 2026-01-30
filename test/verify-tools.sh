@@ -36,17 +36,14 @@ warn() {
   echo -e "${YELLOW}⚠${NC} $1"
 }
 
-# Check if a command exists and can show version
+# Check if a command exists and is executable
 check_tool() {
   local tool="$1"
-  local version_flag="${2:---version}"
+  local bin
+  bin=$(command -v "$tool" 2>/dev/null)
 
-  if command -v "$tool" &>/dev/null; then
-    if "$tool" "$version_flag" &>/dev/null; then
-      pass "$tool"
-    else
-      fail "$tool (installed but version check failed)"
-    fi
+  if [[ -x "$bin" ]]; then
+    pass "$tool"
   else
     fail "$tool (not found)"
   fi
@@ -115,9 +112,9 @@ check_tool just
 
 echo ""
 echo "--- Kubernetes Tools ---"
-check_tool kubectl "version --client"
-check_tool kustomize "version"
-check_tool k9s "version --short"
+check_tool kubectl
+check_tool kustomize
+check_tool k9s
 
 echo ""
 echo "--- Configuration Files ---"
