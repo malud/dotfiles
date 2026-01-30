@@ -19,7 +19,7 @@ test image="ubuntu:22.04" *args="":
         echo "testuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
         cp -r /workspace /home/testuser/dotfiles && \
         chown -R testuser:testuser /home/testuser/dotfiles && \
-        su - testuser -c "export PATH=/usr/local/bin:\$PATH && cd /home/testuser/dotfiles && ./test/run-e2e.sh /home/testuser/dotfiles"'
+        su - testuser -c "export PATH=/usr/local/bin:/sbin:/usr/sbin:\$PATH && cd /home/testuser/dotfiles && ./test/run-e2e.sh /home/testuser/dotfiles"'
 
 # Run E2E tests interactively (for local development)
 test-interactive image="ubuntu:22.04":

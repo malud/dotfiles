@@ -523,7 +523,7 @@
           file:
             path: "{{ krew_temp.path }}"
             state: absent
-      when: krew_check.rc != 0 and kubectl_check.stat.exists
+      when: kubectl_check.stat.exists and (krew_check.rc | default(1)) != 0
 
     # Install kustomize
     - name: Check if kustomize is installed in ~/.local/bin
