@@ -44,6 +44,25 @@ Chezmoi uses special prefixes for source files:
 {{ .name }}, {{ .email }}, {{ .signingkey }}
 ```
 
+## Devcontainer / DevPod Usage
+
+This repository supports development inside devcontainers (VS Code Dev Containers, DevPod, GitHub Codespaces).
+
+**How it works:**
+1. Devcontainer uses `ghcr.io/rio/features/chezmoi` feature to install chezmoi
+2. On Linux containers, chezmoi triggers the Ansible installation path
+3. A named volume (`devcontainer-home`) persists `/home/vscode` across rebuilds
+
+**DevPod configuration:**
+- `SSH_INJECT_GIT_CREDENTIALS=false` prevents host `.gitconfig` syncing
+- Allows different git identities per project (configured via chezmoi prompts)
+- SSH authentication uses agent forwarding instead
+
+**SSH agent forwarding (Docker Desktop on macOS):**
+- Docker Desktop mounts host SSH agent at `/run/host-services/ssh-auth.sock`
+- The devcontainer.json mounts this socket and sets `SSH_AUTH_SOCK`
+- 1Password SSH keys are automatically available inside containers
+
 ## Key Files
 
 | Source File | Destination | Purpose |

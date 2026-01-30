@@ -1,0 +1,37 @@
+name: E2E Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Ubuntu (devcontainer base)
+            image: mcr.microsoft.com/vscode/devcontainers/base:ubuntu
+          - name: Ubuntu 22.04
+            image: ubuntu:22.04
+          - name: Debian Bookworm
+            image: debian:bookworm
+          - name: Fedora 41
+            image: fedora:41
+          - name: Alpine 3.21
+            image: alpine:3.21
+
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install just
+        uses: extractions/setup-just@v2
+
+      - name: Run E2E tests
+        run: just test "${{ matrix.image }}"

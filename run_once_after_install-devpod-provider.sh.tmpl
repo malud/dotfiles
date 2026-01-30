@@ -23,6 +23,13 @@ echo "✓ devpod docker provider installed"
 # Disable telemetry
 echo "Disabling telemetry..."
 devpod context set-options -o TELEMETRY=false
+# Disable .gitconfig syncing from host
+# Reasons:
+# 1. Named volume persists home directory - no need to re-inject
+# 2. Different git identity per project (work vs personal)
+# 3. SSH agent forwarding handles authentication separately
+echo "Disable ssh .gitconfig syncing..."
+devpod context set-options -o SSH_INJECT_GIT_CREDENTIALS=false
 
 # Set default IDE (can be overridden per workspace with --ide flag)
 # Options: goland, pycharm, intellij, vscode, none, etc.

@@ -3,8 +3,12 @@
   "image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu",
   "workspaceFolder": "/workspace",
   "mounts": [
-    "source=devcontainer-home,target=/home/vscode,type=volume"
+    "source=devcontainer-home,target=/home/vscode,type=volume",
+    "source=/run/host-services/ssh-auth.sock,target=/run/host-services/ssh-auth.sock,type=bind"
   ],
+  "containerEnv": {
+    "SSH_AUTH_SOCK": "/run/host-services/ssh-auth.sock"
+  },
   "features": {
     "ghcr.io/rio/features/chezmoi": {}
   },

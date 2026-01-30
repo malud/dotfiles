@@ -678,6 +678,66 @@
         - not k9s_check.stat.exists
         - system_k9s_check.rc != 0
 
+    # Install just (command runner)
+    - name: Check if just is installed in ~/.local/bin
+      stat:
+        path: "{{ local_bin }}/just"
+      register: just_check
+
+    - name: Check if system just exists
+      command: which just
+      register: system_just_check
+      failed_when: false
+      changed_when: false
+      when: not just_check.stat.exists
+
+    - name: Create symlink to system just if present
+      file:
+        src: "{{ system_just_check.stdout }}"
+        dest: "{{ local_bin }}/just"
+        state: link
+      when:
+        - not just_check.stat.exists
+        - system_just_check.rc == 0
+
+    - name: Install just
+      block:
+        - name: Set just architecture
+          set_fact:
+            just_arch: "{{ 'aarch64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
+
+        - name: Create temporary directory for just
+          tempfile:
+            state: directory
+          register: just_temp
+
+        - name: Download just
+          get_url:
+            url: "https://github.com/casey/just/releases/latest/download/just-{{ just_arch }}-unknown-linux-musl.tar.gz"
+            dest: "{{ just_temp.path }}/just.tar.gz"
+            mode: '0644'
+
+        - name: Extract just
+          unarchive:
+            src: "{{ just_temp.path }}/just.tar.gz"
+            dest: "{{ just_temp.path }}"
+            remote_src: yes
+
+        - name: Install just binary
+          copy:
+            src: "{{ just_temp.path }}/just"
+            dest: "{{ local_bin }}/just"
+            mode: '0755'
+            remote_src: yes
+
+        - name: Clean up temporary directory
+          file:
+            path: "{{ just_temp.path }}"
+            state: absent
+      when:
+        - not just_check.stat.exists
+        - system_just_check.rc != 0
+
     # Completion message
     - name: Display installation completion
       debug:

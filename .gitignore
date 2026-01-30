@@ -4,4 +4,4 @@
 *~
 *.swo
 *.swp
-
+.claude/*.local.json
