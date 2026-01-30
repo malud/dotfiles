@@ -7,7 +7,10 @@ fi
 export EDITOR=nvim
 export VISUAL="$EDITOR"
 export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
+# Only set LC_ALL if locale is available
+if locale -a 2>/dev/null | grep -q "en_US.utf8\|en_US.UTF-8"; then
+  export LC_ALL=en_US.UTF-8
+fi
 
 # Fix TERM for better compatibility over SSH and remote environments
 # Ghostty uses xterm-ghostty which may not be available on remote systems

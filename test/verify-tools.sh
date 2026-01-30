@@ -115,9 +115,9 @@ check_tool just
 
 echo ""
 echo "--- Kubernetes Tools ---"
-check_tool kubectl
-check_tool kustomize
-check_tool k9s
+check_tool kubectl "version --client"
+check_tool kustomize "version"
+check_tool k9s "version --short"
 
 echo ""
 echo "--- Configuration Files ---"
