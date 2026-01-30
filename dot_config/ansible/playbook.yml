@@ -5,8 +5,8 @@
   become: false
 
   vars:
-    local_bin: "{{ ansible_env.HOME }}/.local/bin"
-    local_share: "{{ ansible_env.HOME }}/.local/share"
+    local_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin"
+    local_share: "{{ ansible_facts['env']['HOME'] }}/.local/share"
 
   environment:
     DEBIAN_FRONTEND: noninteractive
@@ -18,7 +18,7 @@
       apt:
         update_cache: yes
         cache_valid_time: 3600
-      when: ansible_pkg_mgr == "apt"
+      when: ansible_facts['pkg_mgr'] == "apt"
 
     # Install core utilities via package manager
     - name: Install core CLI tools (apt)
@@ -40,7 +40,7 @@
           - unzip
           - tar
         state: present
-      when: ansible_pkg_mgr == "apt"
+      when: ansible_facts['pkg_mgr'] == "apt"
 
     - name: Install core CLI tools (dnf/yum)
       become: true
@@ -61,7 +61,7 @@
           - unzip
           - tar
         state: present
-      when: ansible_pkg_mgr in ["dnf", "yum"]
+      when: ansible_facts['pkg_mgr'] in ["dnf", "yum"]
 
     - name: Install core CLI tools (apk)
       become: true
@@ -82,7 +82,7 @@
           - unzip
           - tar
         state: present
-      when: ansible_pkg_mgr == "apk"
+      when: ansible_facts['pkg_mgr'] == "apk"
 
     # Create symlinks for Debian-based bat/fd naming
     - name: Create ~/.local/bin directory
@@ -96,7 +96,7 @@
         src: /usr/bin/batcat
         dest: "{{ local_bin }}/bat"
         state: link
-      when: ansible_pkg_mgr == "apt"
+      when: ansible_facts['pkg_mgr'] == "apt"
       ignore_errors: yes
 
     - name: Create fd symlink (if fdfind exists)
@@ -104,7 +104,7 @@
         src: /usr/bin/fdfind
         dest: "{{ local_bin }}/fd"
         state: link
-      when: ansible_pkg_mgr == "apt"
+      when: ansible_facts['pkg_mgr'] == "apt"
       ignore_errors: yes
 
     # Install Neovim from official release
@@ -133,7 +133,7 @@
       block:
         - name: Determine Neovim architecture
           set_fact:
-            nvim_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
+            nvim_arch: "{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'x86_64' }}"
 
         - name: Create temporary directory for Neovim
           tempfile:
@@ -203,7 +203,7 @@
       block:
         - name: Set gping architecture
           set_fact:
-            gping_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
+            gping_arch: "{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'x86_64' }}"
 
         - name: Create temporary directory for gping
           tempfile:
@@ -274,8 +274,8 @@
       block:
         - name: Set trippy architecture
           set_fact:
-            trippy_arch: "{{ 'aarch64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
-            trippy_libc: "{{ 'musl' if ansible_pkg_mgr == 'apk' else 'gnu' }}"
+            trippy_arch: "{{ 'aarch64' if ansible_facts['architecture'] == 'aarch64' else 'x86_64' }}"
+            trippy_libc: "{{ 'musl' if ansible_facts['pkg_mgr'] == 'apk' else 'gnu' }}"
 
         - name: Create temporary directory for trippy
           tempfile:
@@ -346,8 +346,8 @@
       block:
         - name: Set eza architecture and libc variant
           set_fact:
-            eza_arch: "{{ 'aarch64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
-            eza_libc: "{{ 'gnu' if ansible_architecture == 'aarch64' else 'musl' }}"
+            eza_arch: "{{ 'aarch64' if ansible_facts['architecture'] == 'aarch64' else 'x86_64' }}"
+            eza_libc: "{{ 'gnu' if ansible_facts['architecture'] == 'aarch64' else 'musl' }}"
 
         - name: Create temporary directory for eza
           tempfile:
@@ -446,7 +446,7 @@
       block:
         - name: Set kubectl architecture
           set_fact:
-            kubectl_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+            kubectl_arch: "{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"
 
         - name: Get stable kubectl version
           uri:
@@ -493,7 +493,7 @@
 
         - name: Set krew architecture
           set_fact:
-            krew_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+            krew_arch: "{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"
 
         - name: Download krew installer
           get_url:
@@ -518,12 +518,12 @@
             KREW="{{ krew_temp.path }}/krew-linux_{{ krew_arch }}"
             "$KREW" install krew
           environment:
-            KREW_ROOT: "{{ ansible_env.HOME }}/.krew"
+            KREW_ROOT: "{{ ansible_facts['env']['HOME'] }}/.krew"
           changed_when: true
 
         - name: Create symlink for krew in local bin
           file:
-            src: "{{ ansible_env.HOME }}/.krew/bin/kubectl-krew"
+            src: "{{ ansible_facts['env']['HOME'] }}/.krew/bin/kubectl-krew"
             dest: "{{ local_bin }}/kubectl-krew"
             state: link
 
@@ -564,7 +564,7 @@
 
         - name: Set kustomize architecture
           set_fact:
-            kustomize_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+            kustomize_arch: "{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"
 
         - name: Get latest kustomize version
           uri:
@@ -650,7 +650,7 @@
 
         - name: Set k9s architecture
           set_fact:
-            k9s_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+            k9s_arch: "{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"
 
         - name: Download k9s
           get_url:
@@ -717,7 +717,7 @@
       block:
         - name: Set just architecture
           set_fact:
-            just_arch: "{{ 'aarch64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
+            just_arch: "{{ 'aarch64' if ansible_facts['architecture'] == 'aarch64' else 'x86_64' }}"
 
         - name: Get latest just version
           uri:
@@ -791,7 +791,7 @@
       block:
         - name: Set ali architecture
           set_fact:
-            ali_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+            ali_arch: "{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"
 
         - name: Get latest ali version
           uri:
