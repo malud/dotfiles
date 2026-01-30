@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+{{ if ne .chezmoi.os "darwin" -}}
+set -euo pipefail
+
+echo "📦 Installing uv..."
+
+# Check if uv is already installed
+if command -v uv &>/dev/null; then
+  echo "✅ uv already installed ($(uv --version))"
+  exit 0
+fi
+
+# Install uv via official installer
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Source the env to make uv available immediately
+export PATH="${HOME}/.local/bin:${PATH}"
+
+# Verify installation
+if command -v uv &>/dev/null; then
+  echo "✅ uv installed successfully!"
+  uv --version
+else
+  echo "❌ uv installation failed"
+  exit 1
+fi
+
+{{ else -}}
+echo "ℹ️  This script is for Linux only - skipping on macOS"
+exit 0
+{{ end -}}

@@ -6,15 +6,18 @@ set -euo pipefail
 
 echo "🚀 Running Ansible playbook..."
 
-# Verify Ansible is installed
-if ! command -v ansible-playbook &>/dev/null; then
-  echo "❌ Ansible not found. Please run the install-ansible script first."
+# Ensure uv is in PATH
+export PATH="${HOME}/.local/bin:${PATH}"
+
+# Verify uv is installed
+if ! command -v uv &>/dev/null; then
+  echo "❌ uv not found. Please run the install-uv script first."
   exit 1
 fi
 
-# Run the playbook
+# Run the playbook via uvx (isolated, no system pollution)
 cd "${HOME}/.config/ansible"
-ansible-playbook playbook.yml
+uvx ansible-playbook playbook.yml
 
 echo "✅ Ansible playbook completed!"
 
