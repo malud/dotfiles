@@ -8,6 +8,9 @@
     local_bin: "{{ ansible_env.HOME }}/.local/bin"
     local_share: "{{ ansible_env.HOME }}/.local/share"
 
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
   tasks:
     # Update package cache
     - name: Update package cache (apt)
@@ -453,6 +456,7 @@
           register: kubectl_version
           retries: 3
           delay: 5
+          until: kubectl_version.status == 200
 
         - name: Download kubectl
           get_url:
@@ -460,8 +464,10 @@
             dest: "{{ local_bin }}/kubectl"
             mode: '0755'
             timeout: 180
+          register: kubectl_download
           retries: 3
           delay: 5
+          until: kubectl_download is succeeded
 
         - name: Verify kubectl installation
           command: "{{ local_bin }}/kubectl version --client"
@@ -495,8 +501,10 @@
             dest: "{{ krew_temp.path }}/krew.tar.gz"
             mode: '0644'
             timeout: 120
+          register: krew_download
           retries: 3
           delay: 5
+          until: krew_download is succeeded
 
         - name: Extract krew
           unarchive:
@@ -566,6 +574,7 @@
           register: kustomize_release
           retries: 3
           delay: 5
+          until: kustomize_release.status == 200
 
         - name: Set kustomize version
           set_fact:
@@ -577,8 +586,10 @@
             dest: "{{ kustomize_temp.path }}/kustomize.tar.gz"
             mode: '0644'
             timeout: 120
+          register: kustomize_download
           retries: 3
           delay: 5
+          until: kustomize_download is succeeded
 
         - name: Extract kustomize
           unarchive:
@@ -647,8 +658,10 @@
             dest: "{{ k9s_temp.path }}/k9s.tar.gz"
             mode: '0644'
             timeout: 120
+          register: k9s_download
           retries: 3
           delay: 5
+          until: k9s_download is succeeded
 
         - name: Extract k9s
           unarchive:
@@ -714,6 +727,7 @@
           register: just_release
           retries: 3
           delay: 5
+          until: just_release.status == 200
 
         - name: Set just version
           set_fact:
