@@ -706,6 +706,19 @@
           set_fact:
             just_arch: "{{ 'aarch64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
 
+        - name: Get latest just version
+          uri:
+            url: https://api.github.com/repos/casey/just/releases/latest
+            return_content: yes
+            timeout: 120
+          register: just_release
+          retries: 3
+          delay: 5
+
+        - name: Set just version
+          set_fact:
+            just_version: "{{ (just_release.content | from_json).tag_name }}"
+
         - name: Create temporary directory for just
           tempfile:
             state: directory
@@ -713,7 +726,7 @@
 
         - name: Download just
           get_url:
-            url: "https://github.com/casey/just/releases/latest/download/just-{{ just_arch }}-unknown-linux-musl.tar.gz"
+            url: "https://github.com/casey/just/releases/download/{{ just_version }}/just-{{ just_version }}-{{ just_arch }}-unknown-linux-musl.tar.gz"
             dest: "{{ just_temp.path }}/just.tar.gz"
             mode: '0644'
 

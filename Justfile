@@ -8,7 +8,7 @@ default:
 test image="ubuntu:22.04" *args="":
     docker run --rm {{args}} -v "$(pwd):/workspace" {{image}} sh -c ' \
         if command -v apt-get >/dev/null; then \
-            apt-get update && apt-get install -y git curl sudo bash; \
+            export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y git curl sudo bash; \
         elif command -v dnf >/dev/null; then \
             dnf install -y git curl sudo bash; \
         elif command -v apk >/dev/null; then \

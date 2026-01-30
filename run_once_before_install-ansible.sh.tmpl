@@ -36,6 +36,7 @@ fi
 case "$PKG_MGR" in
   apt)
     echo "📦 Using apt-get to install Ansible..."
+    export DEBIAN_FRONTEND=noninteractive
     $USE_SUDO apt-get update
     $USE_SUDO apt-get install -y ansible
     ;;
