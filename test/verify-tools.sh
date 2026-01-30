@@ -39,10 +39,8 @@ warn() {
 # Check if a command exists and is executable
 check_tool() {
   local tool="$1"
-  local bin
-  bin=$(command -v "$tool" 2>/dev/null)
 
-  if [[ -x "$bin" ]]; then
+  if command -v "$tool" &>/dev/null; then
     pass "$tool"
   else
     fail "$tool (not found)"
