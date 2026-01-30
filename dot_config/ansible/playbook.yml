@@ -447,10 +447,10 @@
           uri:
             url: https://dl.k8s.io/release/stable.txt
             return_content: yes
-            timeout: 120
+            timeout: 300
           register: kubectl_version
-          retries: 3
-          delay: 5
+          retries: 5
+          delay: 10
           until: kubectl_version.status == 200
 
         - name: Download kubectl
@@ -458,10 +458,10 @@
             url: "https://dl.k8s.io/release/{{ kubectl_version.content | trim }}/bin/linux/{{ kubectl_arch }}/kubectl"
             dest: "{{ local_bin }}/kubectl"
             mode: '0755'
-            timeout: 180
+            timeout: 300
           register: kubectl_download
-          retries: 3
-          delay: 5
+          retries: 5
+          delay: 10
           until: kubectl_download is succeeded
 
         - name: Verify kubectl installation
@@ -494,10 +494,10 @@
             url: "https://github.com/kubernetes-sigs/krew/releases/latest/download/krew-linux_{{ krew_arch }}.tar.gz"
             dest: "{{ krew_temp.path }}/krew.tar.gz"
             mode: '0644'
-            timeout: 120
+            timeout: 300
           register: krew_download
-          retries: 3
-          delay: 5
+          retries: 5
+          delay: 10
           until: krew_download is succeeded
 
         - name: Extract krew
@@ -563,10 +563,10 @@
           uri:
             url: https://api.github.com/repos/kubernetes-sigs/kustomize/releases/latest
             return_content: yes
-            timeout: 120
+            timeout: 300
           register: kustomize_release
-          retries: 3
-          delay: 5
+          retries: 5
+          delay: 10
           until: kustomize_release.status == 200
 
         - name: Set kustomize version
@@ -578,10 +578,10 @@
             url: "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/{{ kustomize_version }}/kustomize_{{ kustomize_version }}_linux_{{ kustomize_arch }}.tar.gz"
             dest: "{{ kustomize_temp.path }}/kustomize.tar.gz"
             mode: '0644'
-            timeout: 120
+            timeout: 300
           register: kustomize_download
-          retries: 3
-          delay: 5
+          retries: 5
+          delay: 10
           until: kustomize_download is succeeded
 
         - name: Extract kustomize
@@ -649,10 +649,10 @@
             url: "https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_{{ k9s_arch }}.tar.gz"
             dest: "{{ k9s_temp.path }}/k9s.tar.gz"
             mode: '0644'
-            timeout: 120
+            timeout: 300
           register: k9s_download
-          retries: 3
-          delay: 5
+          retries: 5
+          delay: 10
           until: k9s_download is succeeded
 
         - name: Extract k9s
@@ -714,10 +714,10 @@
           uri:
             url: https://api.github.com/repos/casey/just/releases/latest
             return_content: yes
-            timeout: 120
+            timeout: 300
           register: just_release
-          retries: 3
-          delay: 5
+          retries: 5
+          delay: 10
           until: just_release.status == 200
 
         - name: Set just version
@@ -787,10 +787,10 @@
           uri:
             url: https://api.github.com/repos/nakabonne/ali/releases/latest
             return_content: yes
-            timeout: 120
+            timeout: 300
           register: ali_release
-          retries: 3
-          delay: 5
+          retries: 5
+          delay: 10
           until: ali_release.status == 200
 
         - name: Set ali version
@@ -807,10 +807,10 @@
             url: "https://github.com/nakabonne/ali/releases/download/v{{ ali_version }}/ali_{{ ali_version }}_linux_{{ ali_arch }}.tar.gz"
             dest: "{{ ali_temp.path }}/ali.tar.gz"
             mode: '0644'
-            timeout: 120
+            timeout: 300
           register: ali_download
-          retries: 3
-          delay: 5
+          retries: 5
+          delay: 10
           until: ali_download is succeeded
 
         - name: Extract ali
