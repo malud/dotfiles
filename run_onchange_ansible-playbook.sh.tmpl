@@ -17,7 +17,7 @@ fi
 
 # Run the playbook via uvx (isolated, no system pollution)
 cd "${HOME}/.config/ansible"
-uvx ansible-playbook playbook.yml
+uvx --from ansible ansible-playbook playbook.yml
 
 echo "✅ Ansible playbook completed!"
 
