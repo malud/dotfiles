@@ -765,6 +765,92 @@
         - not just_check.stat.exists
         - system_just_check.rc != 0
 
+    # Install ali (load testing tool)
+    - name: Check if ali is installed in ~/.local/bin
+      stat:
+        path: "{{ local_bin }}/ali"
+      register: ali_check
+
+    - name: Check if system ali exists
+      command: which ali
+      register: system_ali_check
+      failed_when: false
+      changed_when: false
+      when: not ali_check.stat.exists
+
+    - name: Create symlink to system ali if present
+      file:
+        src: "{{ system_ali_check.stdout }}"
+        dest: "{{ local_bin }}/ali"
+        state: link
+      when:
+        - not ali_check.stat.exists
+        - system_ali_check.rc == 0
+
+    - name: Install ali
+      block:
+        - name: Set ali architecture
+          set_fact:
+            ali_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+
+        - name: Get latest ali version
+          uri:
+            url: https://api.github.com/repos/nakabonne/ali/releases/latest
+            return_content: yes
+            timeout: 120
+          register: ali_release
+          retries: 3
+          delay: 5
+          until: ali_release.status == 200
+
+        - name: Set ali version
+          set_fact:
+            ali_version: "{{ (ali_release.content | from_json).tag_name | regex_replace('^v', '') }}"
+
+        - name: Create temporary directory for ali
+          tempfile:
+            state: directory
+          register: ali_temp
+
+        - name: Download ali
+          get_url:
+            url: "https://github.com/nakabonne/ali/releases/download/v{{ ali_version }}/ali_{{ ali_version }}_linux_{{ ali_arch }}.tar.gz"
+            dest: "{{ ali_temp.path }}/ali.tar.gz"
+            mode: '0644'
+            timeout: 120
+          register: ali_download
+          retries: 3
+          delay: 5
+          until: ali_download is succeeded
+
+        - name: Extract ali
+          unarchive:
+            src: "{{ ali_temp.path }}/ali.tar.gz"
+            dest: "{{ ali_temp.path }}"
+            remote_src: yes
+
+        - name: Install ali binary
+          shell: |
+            cd "{{ ali_temp.path }}"
+            ali_binary=$(find . -name 'ali' -type f | head -n 1)
+            if [ -n "$ali_binary" ]; then
+              cp "$ali_binary" "{{ local_bin }}/ali"
+              chmod 755 "{{ local_bin }}/ali"
+            else
+              echo "ERROR: ali binary not found in extracted archive"
+              exit 1
+            fi
+          args:
+            creates: "{{ local_bin }}/ali"
+
+        - name: Clean up temporary directory
+          file:
+            path: "{{ ali_temp.path }}"
+            state: absent
+      when:
+        - not ali_check.stat.exists
+        - system_ali_check.rc != 0
+
     # Completion message
     - name: Display installation completion
       debug:
