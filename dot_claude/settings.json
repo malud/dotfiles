@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh run list*)",
+      "Bash(gh run view*)",
+      "Bash(gh issue list*)",
+      "Bash(gh issue view*)",
+      "Bash(gh pr list*)",
+      "Bash(gh pr view*)",
+      "Bash(gh api repos/*/issues/*)",
+      "Bash(gh api repos/*/pulls/*)"
+    ],
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/*.ovpn)",
+      "Read(**/*.OVPN)",
+      "Read(~/.ssh/*)",
+      "Read(~/.kube/*)",
+      "Read(~/.docker/*)",
+      "Read(~/.npmrc)"
+    ]
+  }
+}
