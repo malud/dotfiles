@@ -34,7 +34,7 @@ shell-integration-features = cursor,sudo,title
 shell-integration = bash
 
 # Scrollback & Mouse
-scrollback-limit = 50000
+scrollback-limit = 10000000
 mouse-scroll-multiplier = 2
 focus-follows-mouse = true
 
