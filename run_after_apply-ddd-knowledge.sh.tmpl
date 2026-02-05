@@ -49,17 +49,25 @@ for dir in languages references; do
     done
 done
 
-# 4. Append to CLAUDE.md (with marker to avoid duplicates)
+# 4. Create CLAUDE.md (DevPod info + DDD content)
 DDD_CLAUDE=$(fetch_file "CLAUDE.md")
-MARKER="<!-- DDD-KNOWLEDGE-BASE -->"
-if ! grep -q "$MARKER" "$DEST/CLAUDE.md" 2>/dev/null; then
-    {
-        echo ""
-        echo "$MARKER"
-        echo ""
-        echo "$DDD_CLAUDE"
-    } >> "$DEST/CLAUDE.md"
-fi
+cat > "$DEST/CLAUDE.md" << 'DEVPOD'
+# CLAUDE.md
+
+## DevPod
+
+Execute commands inside devcontainers:
+
+```bash
+devpod ssh <project_dir> --command "cd /workspace && <command>"
+```
+
+The workspace is mounted at `/workspace`.
+
+---
+
+DEVPOD
+echo "$DDD_CLAUDE" >> "$DEST/CLAUDE.md"
 
 echo "DDD knowledge base applied"
 {{ end -}}
