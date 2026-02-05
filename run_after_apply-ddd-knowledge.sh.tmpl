@@ -34,6 +34,7 @@ else
 fi
 
 # 2. Copy agents/
+rm -rf "$DEST/.claude/agents"
 mkdir -p "$DEST/.claude/agents"
 for file in $(fetch_dir_list ".claude/agents"); do
     fetch_file "$file" > "$DEST/.claude/agents/$(basename "$file")"
@@ -41,6 +42,7 @@ done
 
 # 3. Copy languages/ and references/
 for dir in languages references; do
+    rm -rf "$DEST/$dir"
     mkdir -p "$DEST/$dir"
     for file in $(fetch_dir_list "$dir"); do
         fetch_file "$file" > "$DEST/$dir/$(basename "$file")"
