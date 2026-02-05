@@ -1,0 +1,60 @@
+{{ if lookPath "gh" -}}
+#!/usr/bin/env bash
+# hash: {{ output "gh" "api" "repos/malud/domain-driven-design/commits/main" "--jq" ".sha" | trim }}
+set -euo pipefail
+
+if ! gh auth status &>/dev/null; then
+    echo "Skipping DDD knowledge base: gh not authenticated"
+    exit 0
+fi
+
+REPO="malud/domain-driven-design"
+DEST="$HOME"
+
+fetch_file() {
+    gh api "repos/$REPO/contents/$1" --jq '.content' | base64 -d
+}
+
+fetch_dir_list() {
+    gh api "repos/$REPO/contents/$1" --jq '.[].path'
+}
+
+# 1. Merge settings.json
+mkdir -p "$DEST/.claude"
+DDD_SETTINGS=$(fetch_file ".claude/settings.json")
+if [[ -f "$DEST/.claude/settings.json" ]]; then
+    jq -s '.[0] * .[1] | .permissions.allow = (.[0].permissions.allow + .[1].permissions.allow | unique)' \
+        "$DEST/.claude/settings.json" <(echo "$DDD_SETTINGS") > "$DEST/.claude/settings.json.tmp"
+    mv "$DEST/.claude/settings.json.tmp" "$DEST/.claude/settings.json"
+else
+    echo "$DDD_SETTINGS" > "$DEST/.claude/settings.json"
+fi
+
+# 2. Copy agents/
+mkdir -p "$DEST/.claude/agents"
+for file in $(fetch_dir_list ".claude/agents"); do
+    fetch_file "$file" > "$DEST/.claude/agents/$(basename "$file")"
+done
+
+# 3. Copy languages/ and references/
+for dir in languages references; do
+    mkdir -p "$DEST/$dir"
+    for file in $(fetch_dir_list "$dir"); do
+        fetch_file "$file" > "$DEST/$dir/$(basename "$file")"
+    done
+done
+
+# 4. Append to CLAUDE.md (with marker to avoid duplicates)
+DDD_CLAUDE=$(fetch_file "CLAUDE.md")
+MARKER="<!-- DDD-KNOWLEDGE-BASE -->"
+if ! grep -q "$MARKER" "$DEST/CLAUDE.md" 2>/dev/null; then
+    {
+        echo ""
+        echo "$MARKER"
+        echo ""
+        echo "$DDD_CLAUDE"
+    } >> "$DEST/CLAUDE.md"
+fi
+
+echo "DDD knowledge base applied"
+{{ end -}}
