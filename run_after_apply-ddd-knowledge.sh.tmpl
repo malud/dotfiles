@@ -1,6 +1,5 @@
 {{ if lookPath "gh" -}}
 #!/usr/bin/env bash
-# hash: {{ output "gh" "api" "repos/malud/domain-driven-design/commits/main" "--jq" ".sha" | trim }}
 set -euo pipefail
 
 if ! gh auth status &>/dev/null; then
