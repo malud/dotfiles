@@ -1,6 +1,23 @@
 {
   "permissions": {
     "allow": [
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(less:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+      "Bash(file:*)",
+      "Bash(wc:*)",
+      "Bash(stat:*)",
+      "Bash(which:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)",
+      "Bash(git -C:*)",
       "Bash(gh run list*)",
       "Bash(gh run view*)",
       "Bash(gh issue list*)",
