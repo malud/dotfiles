@@ -2,24 +2,19 @@
 {{ if eq .chezmoi.os "darwin" -}}
 set -euo pipefail
 
-# Hash: {{ include "dot_Brewfile.tmpl" | sha256sum }}
-
-echo "🔄 Updating Homebrew and packages..."
-
-# Ensure Homebrew is in PATH
 if [ -f /opt/homebrew/bin/brew ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [ -f /usr/local/bin/brew ]; then
   eval "$(/usr/local/bin/brew shellenv)"
+else
+  echo "❌ Homebrew not found"
+  exit 1
 fi
 
 brew update
+brew bundle --file="${HOME}/.Brewfile"
 brew upgrade
 brew cleanup
-
-echo "✅ Homebrew updated!"
 {{ else -}}
-echo "⚠️  This script is only for macOS"
 exit 0
 {{ end -}}
-
