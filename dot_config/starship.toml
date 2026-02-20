@@ -26,6 +26,7 @@ $cmd_duration\
 $line_break\
 $character"""
 
+command_timeout = 1500
 palette = 'catppuccin_mocha'
 
 [palettes.catppuccin_mocha]
