@@ -94,6 +94,7 @@ fi
 export PATH="$GOPATH/bin:$PATH"
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 export PATH="$HOME/.lmstudio/bin:$PATH"
+export PATH="$PATH:/Applications/Obsidian.app/Contents/MacOS"
 
 # 1Password SSH agent (macOS)
 if [[ "$OSTYPE" == "darwin"* ]]; then

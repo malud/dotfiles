@@ -51,7 +51,7 @@ done
 
 # 4. Create CLAUDE.md (DevPod info + DDD content)
 DDD_CLAUDE=$(fetch_file "CLAUDE.md")
-cat > "$DEST/CLAUDE.md" << 'DEVPOD'
+cat > "$DEST/CLAUDE.md" << 'HEADER'
 # CLAUDE.md
 
 ## DevPod
@@ -64,9 +64,17 @@ devpod ssh <project_dir> --command "cd /workspace && <command>"
 
 The workspace is mounted at `/workspace`.
 
+## Obsidian CLI
+
+Obsidian includes a CLI for vault management. Binary is at `/Applications/Obsidian.app/Contents/MacOS/obsidian` (added to PATH via `~/.bashrc`).
+
+- Run `obsidian help` to see all available commands
+- Run `obsidian help <command>` for detailed usage of a specific command
+- Docs: https://help.obsidian.md/cli
+
 ---
 
-DEVPOD
+HEADER
 echo "$DDD_CLAUDE" >> "$DEST/CLAUDE.md"
 
 echo "DDD knowledge base applied"
