@@ -4,7 +4,7 @@
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command')
 
-if [[ "$COMMAND" =~ ^git[[:space:]]+commit ]]; then
+if [[ "$COMMAND" =~ git[[:space:]]+commit ]]; then
   gitui
 fi
 
