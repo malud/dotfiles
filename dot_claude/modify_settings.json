@@ -1,9 +1,34 @@
 {{- /* chezmoi:modify-template */ -}}
-{{- $existing := dict -}}
+{{- $defaults := dict
+      "permissions" (dict
+        "allow" (list
+          "Bash(ls:*)" "Bash(cat:*)" "Bash(less:*)" "Bash(head:*)"
+          "Bash(tail:*)" "Bash(find:*)" "Bash(tree:*)" "Bash(file:*)"
+          "Bash(wc:*)" "Bash(stat:*)" "Bash(which:*)"
+          "Bash(git status:*)" "Bash(git log:*)" "Bash(git diff:*)"
+          "Bash(git branch:*)" "Bash(git show:*)" "Bash(git -C:*)"
+          "Bash(gh run list*)" "Bash(gh run view*)"
+          "Bash(gh issue list*)" "Bash(gh issue view*)"
+          "Bash(gh pr list*)" "Bash(gh pr view*)"
+          "Bash(gh api repos/*/issues/*)" "Bash(gh api repos/*/pulls/*)"
+        )
+        "deny" (list
+          "Read(**/.env)" "Read(**/*.ovpn)" "Read(**/*.OVPN)"
+          "Read(~/.ssh/*)" "Read(~/.kube/*)" "Read(~/.docker/*)" "Read(~/.npmrc)"
+        )
+      )
+      "enabledPlugins" (dict
+        "context7@claude-plugins-official" true
+        "frontend-design@claude-plugins-official" true
+        "interface-design@interface-design" true
+      )
+-}}
+{{- /* Existing file wins for shared keys, defaults fill in missing keys */ -}}
 {{- if .chezmoi.stdin -}}
-{{-   $existing = fromJson .chezmoi.stdin -}}
+{{-   $defaults = merge $defaults (fromJson .chezmoi.stdin) -}}
 {{- end -}}
-{{- $hooks := dict
+{{- /* Hooks and statusLine — always enforced from dotfiles */ -}}
+{{- $defaults = setValueAtPath "hooks" (dict
       "PreToolUse" (list
         (dict
           "matcher" "Bash"
@@ -15,11 +40,11 @@
           )
         )
       )
+    ) $defaults
 -}}
-{{- $statusLine := dict
+{{- $defaults = setValueAtPath "statusLine" (dict
       "type" "command"
       "command" (printf "bash %s/.claude/statusline-command.sh" .chezmoi.homeDir)
+    ) $defaults
 -}}
-{{- $existing = set $existing "hooks" $hooks -}}
-{{- $existing = set $existing "statusLine" $statusLine -}}
-{{- toPrettyJson $existing }}
+{{- toPrettyJson $defaults }}
