@@ -27,6 +27,17 @@ c_subtext=$(fg 166 173 200)     # #a6adc8
 c_overlay=$(fg 127 132 156)     # #7f849c
 c_surface2=$(fg 88 91 112)      # #585b70
 
+# Cat icon color — random unused Catppuccin accent per refresh
+cat_colors=(
+  "$(fg 245 224 220)"   # Rosewater
+  "$(fg 242 205 205)"   # Flamingo
+  "$(fg 245 194 231)"   # Pink
+  "$(fg 235 160 172)"   # Maroon
+  "$(fg 137 220 235)"   # Sky
+  "$(fg 116 199 236)"   # Sapphire
+)
+c_cat="${cat_colors[$((RANDOM % ${#cat_colors[@]}))]}"
+
 sep="${c_surface2}|${reset}"
 
 # ---------------------------------------------------------------------------
@@ -107,16 +118,7 @@ if [ -n "$used_pct" ]; then
   bar_empty=""
   for (( i=0; i<empty; i++ )); do bar_empty+="${line_char}"; done
 
-  # Cat color shifts with usage
-  if [ "$used_int" -lt 50 ]; then
-    cat_icon="${c_green}${cat_char}${reset}"
-  elif [ "$used_int" -lt 70 ]; then
-    cat_icon="${c_yellow}${cat_char}${reset}"
-  elif [ "$used_int" -lt 90 ]; then
-    cat_icon="${c_peach}${cat_char}${reset}"
-  else
-    cat_icon="${c_red}${cat_char}${reset}"
-  fi
+  cat_icon="${c_cat}${cat_char}${reset}"
 
   # Fish disappears at 90%+
   if [ "$used_int" -lt 90 ]; then
