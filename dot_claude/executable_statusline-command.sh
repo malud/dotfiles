@@ -154,7 +154,8 @@ if [ -n "$cwd" ] && git -C "$cwd" rev-parse --git-dir >/dev/null 2>&1; then
         review_count=${review_count:-0}
         authored_count=${authored_count:-0}
         if [ "$review_count" -gt 0 ] || [ "$authored_count" -gt 0 ]; then
-          gh_seg="${c_text} ${reset} ${c_peach}${review_count}${reset}${c_overlay}/${reset}${c_blue}${authored_count}${reset}"
+          gh_icon=$'\U000F02A4'  # nf-md-git_pull_request (U+F02A4)
+          gh_seg="${c_text}${gh_icon}${reset} ${c_peach}${review_count} review${reset} ${c_overlay}/${reset} ${c_blue}${authored_count} mine${reset}"
         fi
       fi
     fi
