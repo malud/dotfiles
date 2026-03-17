@@ -1,0 +1,68 @@
+{{ if lookPath "jq" -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+SETTINGS="$HOME/.claude/settings.json"
+mkdir -p "$HOME/.claude"
+
+# Defaults for fresh installs
+DEFAULTS='{{ `{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)", "Bash(cat:*)", "Bash(less:*)", "Bash(head:*)",
+      "Bash(tail:*)", "Bash(find:*)", "Bash(tree:*)", "Bash(file:*)",
+      "Bash(wc:*)", "Bash(stat:*)", "Bash(which:*)",
+      "Bash(git status:*)", "Bash(git log:*)", "Bash(git diff:*)",
+      "Bash(git branch:*)", "Bash(git show:*)", "Bash(git -C:*)",
+      "Bash(gh run list*)", "Bash(gh run view*)",
+      "Bash(gh issue list*)", "Bash(gh issue view*)",
+      "Bash(gh pr list*)", "Bash(gh pr view*)",
+      "Bash(gh api repos/*/issues/*)", "Bash(gh api repos/*/pulls/*)"
+    ],
+    "deny": [
+      "Read(**/.env)", "Read(**/*.ovpn)", "Read(**/*.OVPN)",
+      "Read(~/.ssh/*)", "Read(~/.kube/*)", "Read(~/.docker/*)", "Read(~/.npmrc)"
+    ]
+  },
+  "enabledPlugins": {
+    "context7@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "interface-design@interface-design": true
+  }
+}` }}'
+
+# Enforced keys from dotfiles (always overwrite)
+ENFORCED='{{ `{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash HOME_PLACEHOLDER/.claude/hooks/gitui-before-commit.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash HOME_PLACEHOLDER/.claude/statusline-command.sh"
+  }
+}` }}'
+ENFORCED=$(echo "$ENFORCED" | sed "s|HOME_PLACEHOLDER|$HOME|g")
+
+if [[ -f "$SETTINGS" ]]; then
+    # Merge: existing wins for shared keys, defaults fill missing, enforced always overwrites
+    jq -s '.[0] as $defaults | .[1] as $existing | .[2] as $enforced |
+        ($defaults * $existing * $enforced)' \
+        <(echo "$DEFAULTS") "$SETTINGS" <(echo "$ENFORCED") > "${SETTINGS}.tmp"
+    mv "${SETTINGS}.tmp" "$SETTINGS"
+else
+    # Fresh install: defaults + enforced
+    jq -s '.[0] * .[1]' <(echo "$DEFAULTS") <(echo "$ENFORCED") > "$SETTINGS"
+fi
+
+echo "Claude Code settings merged"
+{{ end -}}

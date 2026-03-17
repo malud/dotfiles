@@ -22,12 +22,13 @@ fetch_dir_list() {
 mkdir -p "$DEST/.claude"
 DDD_SETTINGS=$(fetch_file ".claude/settings.json")
 if [[ -f "$DEST/.claude/settings.json" ]]; then
-    jq -s '{
-        permissions: {
-            allow: ([.[].permissions.allow] | add | unique),
-            deny: (.[0].permissions.deny // [])
-        }
-    }' "$DEST/.claude/settings.json" <(echo "$DDD_SETTINGS") > "$DEST/.claude/settings.json.tmp"
+    jq -s '.[0] as $existing | .[1] as $ddd |
+        ($existing * {
+            permissions: {
+                allow: ([$existing.permissions.allow, $ddd.permissions.allow] | add | unique),
+                deny: ($existing.permissions.deny // [])
+            }
+        })' "$DEST/.claude/settings.json" <(echo "$DDD_SETTINGS") > "$DEST/.claude/settings.json.tmp"
     mv "$DEST/.claude/settings.json.tmp" "$DEST/.claude/settings.json"
 else
     echo "$DDD_SETTINGS" > "$DEST/.claude/settings.json"
