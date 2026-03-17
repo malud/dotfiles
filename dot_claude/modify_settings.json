@@ -1,0 +1,25 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- $existing := dict -}}
+{{- if .chezmoi.stdin -}}
+{{-   $existing = fromJson .chezmoi.stdin -}}
+{{- end -}}
+{{- $hooks := dict
+      "PreToolUse" (list
+        (dict
+          "matcher" "Bash"
+          "hooks" (list
+            (dict
+              "type" "command"
+              "command" (printf "bash %s/.claude/hooks/gitui-before-commit.sh" .chezmoi.homeDir)
+            )
+          )
+        )
+      )
+-}}
+{{- $statusLine := dict
+      "type" "command"
+      "command" (printf "bash %s/.claude/statusline-command.sh" .chezmoi.homeDir)
+-}}
+{{- $existing = set $existing "hooks" $hooks -}}
+{{- $existing = set $existing "statusLine" $statusLine -}}
+{{- toPrettyJson $existing }}
