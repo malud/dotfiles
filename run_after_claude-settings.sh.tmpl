@@ -33,6 +33,10 @@ DEFAULTS='{{ `{
 
 # Enforced keys from dotfiles (always overwrite)
 ENFORCED='{{ `{
+  "attribution": {
+    "commit": "Co-Authored-By: Claude Code <noreply@anthropic.com>",
+    "pr": "\n\nAssisted by [Claude Code](https://claude.ai/code)"
+  },
   "hooks": {
     "PreToolUse": [
       {
