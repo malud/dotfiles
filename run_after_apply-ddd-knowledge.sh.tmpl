@@ -18,6 +18,18 @@ fetch_dir_list() {
     gh api "repos/$REPO/contents/$1" --jq '.[].path'
 }
 
+fetch_dir_recursive() {
+    local remote_dir="$1" local_dir="$2"
+    mkdir -p "$local_dir"
+    gh api "repos/$REPO/contents/$remote_dir" --jq '.[] | .path + "\t" + .type' | while IFS=$'\t' read -r path type; do
+        if [[ "$type" == "dir" ]]; then
+            fetch_dir_recursive "$path" "$local_dir/$(basename "$path")"
+        else
+            fetch_file "$path" > "$local_dir/$(basename "$path")"
+        fi
+    done
+}
+
 # 1. Merge settings.json
 mkdir -p "$DEST/.claude"
 DDD_SETTINGS=$(fetch_file ".claude/settings.json")
@@ -41,7 +53,11 @@ for file in $(fetch_dir_list ".claude/agents"); do
     fetch_file "$file" > "$DEST/.claude/agents/$(basename "$file")"
 done
 
-# 3. Copy languages/ and references/
+# 3. Copy skills/
+rm -rf "$DEST/.claude/skills"
+fetch_dir_recursive ".claude/skills" "$DEST/.claude/skills"
+
+# 4. Copy languages/ and references/
 for dir in languages references; do
     rm -rf "$DEST/$dir"
     mkdir -p "$DEST/$dir"
@@ -50,7 +66,7 @@ for dir in languages references; do
     done
 done
 
-# 4. Create CLAUDE.md (DevPod info + DDD content)
+# 5. Create CLAUDE.md (DevPod info + DDD content)
 DDD_CLAUDE=$(fetch_file "CLAUDE.md")
 cat > "$DEST/CLAUDE.md" << 'HEADER'
 # CLAUDE.md
