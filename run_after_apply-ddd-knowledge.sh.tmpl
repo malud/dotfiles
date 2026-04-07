@@ -10,6 +10,11 @@ fi
 REPO="malud/domain-driven-design"
 DEST="$HOME"
 
+if ! gh api "repos/$REPO" --jq '.id' &>/dev/null; then
+    echo "Skipping DDD knowledge base: no access to $REPO"
+    exit 0
+fi
+
 fetch_file() {
     gh api "repos/$REPO/contents/$1" --jq '.content' | base64 -d
 }
