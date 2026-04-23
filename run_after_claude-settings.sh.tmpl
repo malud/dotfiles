@@ -44,6 +44,10 @@ ENFORCED='{{ `{
         "hooks": [
           {
             "type": "command",
+            "command": "command -v rtk &>/dev/null && rtk hook claude || true"
+          },
+          {
+            "type": "command",
             "command": "bash HOME_PLACEHOLDER/.claude/hooks/gitui-before-commit.sh"
           }
         ]

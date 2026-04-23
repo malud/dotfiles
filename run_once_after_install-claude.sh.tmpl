@@ -1,0 +1,13 @@
+{{ if ne .chezmoi.os "windows" -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -f "$HOME/.local/bin/claude" ]]; then
+  echo "Claude Code already installed, skipping"
+  exit 0
+fi
+
+echo "Installing Claude Code via native installer..."
+curl -fsSL https://claude.ai/install.sh | bash
+echo "✓ Claude Code installed"
+{{ end -}}
