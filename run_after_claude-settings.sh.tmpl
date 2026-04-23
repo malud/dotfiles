@@ -5,6 +5,12 @@ set -euo pipefail
 SETTINGS="$HOME/.claude/settings.json"
 mkdir -p "$HOME/.claude"
 
+{{ if lookPath "rtk" -}}
+RTK_HOOK_CMD='rtk hook claude'
+{{ else -}}
+RTK_HOOK_CMD='command -v rtk &>/dev/null && rtk hook claude || true'
+{{ end -}}
+
 # Defaults for fresh installs
 DEFAULTS='{{ `{
   "permissions": {
@@ -44,7 +50,7 @@ ENFORCED='{{ `{
         "hooks": [
           {
             "type": "command",
-            "command": "command -v rtk &>/dev/null && rtk hook claude || true"
+            "command": "RTK_HOOK_CMD_PLACEHOLDER"
           },
           {
             "type": "command",
@@ -59,7 +65,8 @@ ENFORCED='{{ `{
     "command": "bash HOME_PLACEHOLDER/.claude/statusline-command.sh"
   }
 }` }}'
-ENFORCED=$(echo "$ENFORCED" | sed "s|HOME_PLACEHOLDER|$HOME|g")
+ENFORCED="${ENFORCED//RTK_HOOK_CMD_PLACEHOLDER/$RTK_HOOK_CMD}"
+ENFORCED="${ENFORCED//HOME_PLACEHOLDER/$HOME}"
 
 if [[ -f "$SETTINGS" ]]; then
     # Merge: existing wins for shared keys, defaults fill missing, enforced always overwrites
