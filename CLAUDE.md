@@ -63,6 +63,18 @@ This repository supports development inside devcontainers (VS Code Dev Container
 - The devcontainer.json mounts this socket and sets `SSH_AUTH_SOCK`
 - 1Password SSH keys are automatically available inside containers
 
+## Home-Directory `~/CLAUDE.md` (Assembled, Not Managed)
+
+`~/CLAUDE.md` is not a chezmoi-tracked file. It is rewritten on every `chezmoi apply` by `run_after_apply-ddd-knowledge.sh.tmpl`. Direct edits are lost.
+
+**Composition:**
+1. **HEADER heredoc** in the apply script — working-style guidelines, DevPod, Obsidian CLI
+2. **DDD knowledge base** — fetched at apply time from `malud/domain-driven-design` `CLAUDE.md` (private; skipped if `gh` is unauthenticated or lacks access)
+
+The same script syncs `.claude/agents/`, `.claude/skills/`, `languages/`, and `references/` from the DDD repo, and merges `.claude/settings.json` permission allow-lists.
+
+To change the preamble, edit the heredoc in `run_after_apply-ddd-knowledge.sh.tmpl` then `chezmoi apply`. To change the DDD content, edit the upstream repo.
+
 ## Key Files
 
 | Source File | Destination | Purpose |
@@ -73,6 +85,7 @@ This repository supports development inside devcontainers (VS Code Dev Container
 | `dot_config/ansible/playbook.yml` | `~/.config/ansible/playbook.yml` | Linux package installation |
 | `dot_config/nvim/init.lua` | `~/.config/nvim/init.lua` | Neovim config (lazy.nvim) |
 | `dot_config/starship.toml` | `~/.config/starship.toml` | Prompt configuration |
+| `run_after_apply-ddd-knowledge.sh.tmpl` | `~/CLAUDE.md`, `~/.claude/`, `~/languages/`, `~/references/` | Assembles user-global Claude config from the private `malud/domain-driven-design` repo |
 
 ## Code Style
 
