@@ -48,6 +48,8 @@ model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"')
 cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // empty')
 used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 remaining_pct=$(echo "$input" | jq -r '.context_window.remaining_percentage // empty')
+rate_5h=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
+rate_7d=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
 
 # ---------------------------------------------------------------------------
 # Segment: Vim mode
@@ -131,6 +133,31 @@ if [ -n "$used_pct" ]; then
 fi
 
 # ---------------------------------------------------------------------------
+# Segment: Rate-limit usage (Pro/Max — 5h rolling, 7d weekly)
+# rate_limits is absent until the first API response; each window may also
+# be missing independently, so guard each one.
+# ---------------------------------------------------------------------------
+rate_seg=""
+if [ -n "$rate_5h" ]; then
+  rate_5h_int=$(printf '%.0f' "$rate_5h")
+  if [ "$rate_5h_int" -lt 50 ]; then
+    rate_color="$c_green"
+  elif [ "$rate_5h_int" -lt 75 ]; then
+    rate_color="$c_yellow"
+  elif [ "$rate_5h_int" -lt 90 ]; then
+    rate_color="$c_peach"
+  else
+    rate_color="$c_red"
+  fi
+  clock_char=$'\U0000F252'  # nf-fa-hourglass_half
+  rate_seg="${c_overlay}${clock_char}${reset} ${rate_color}5h ${rate_5h_int}%${reset}"
+  if [ -n "$rate_7d" ]; then
+    rate_7d_int=$(printf '%.0f' "$rate_7d")
+    rate_seg="${rate_seg} ${c_overlay}7d ${rate_7d_int}%${reset}"
+  fi
+fi
+
+# ---------------------------------------------------------------------------
 # Segment: gitui hint (only when inside a git repo)
 # ---------------------------------------------------------------------------
 git_seg=""
@@ -171,6 +198,7 @@ parts=()
 [ -n "$model_seg" ]   && parts+=("$model_seg")
 [ -n "$dir_seg" ]     && parts+=("$dir_seg")
 [ -n "$bar_seg" ]     && parts+=("$bar_seg")
+[ -n "$rate_seg" ]    && parts+=("$rate_seg")
 [ -n "$git_seg" ]     && parts+=("$git_seg")
 [ -n "$gh_seg" ]      && parts+=("$gh_seg")
 
