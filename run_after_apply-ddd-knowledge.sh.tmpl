@@ -115,9 +115,29 @@ For multi-step work, state a brief plan with per-step verification:
 2. [step] → verify: [check]
 ```
 
-### Plan mode — chunk for reviewability
+### Implementation workflow
 
-Decompose non-trivial work into **stacked PRs of ~500 changed lines each**. Each PR is independently reviewable, mergeable in order, and has its own success criteria. Surface the dependency chain in the plan.
+Keywords below use RFC 2119 (MUST, MUST NOT, SHOULD, MAY).
+
+Goal: a reviewer MUST be able to follow each commit and PR with minimal effort.
+
+**Commits**
+- Each commit MUST be cohesive — one topic, self-contained, split by cohesion not by file.
+- Stage hunks with `git add -p`.
+- Commit messages MUST be one or two sentences explaining the *why*.
+- Commits MUST NOT be amended — history preserves change reasoning.
+- When the split is unclear, MUST ask the user before committing.
+
+*Example.* A change adds a helper in `utils.ts`, imports and uses it in `service.ts`, and tweaks unrelated button text in `Header.tsx`. The button text MUST be its own commit. The helper definition and its first use MAY share one commit, or split further if the definition stands on its own.
+
+**Pull Requests**
+- A PR SHOULD target ~500 changed lines. This is a soft target, not a hard cap.
+- Each PR MUST focus on one topic; mixed concerns MUST be split.
+- Larger work MUST be stacked into multiple PRs that merge in order.
+- The PR description MUST state the context (why this change). Stacked PRs MUST link to predecessor and successor.
+
+**Planning**
+- For non-trivial work, plans MUST surface the stacked-PR breakdown and dependency chain up front.
 
 ### Docstrings
 
