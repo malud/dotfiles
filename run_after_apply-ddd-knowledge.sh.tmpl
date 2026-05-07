@@ -139,9 +139,24 @@ Goal: a reviewer MUST be able to follow each commit and PR with minimal effort.
 **Planning**
 - For non-trivial work, plans MUST surface the stacked-PR breakdown and dependency chain up front.
 
-### Docstrings
+### Docstrings and comments
 
-One line by default. Skip when the signature is self-explanatory. Defer to the project's docstring convention (Google, NumPy, reST) when one exists.
+Comment the *goal* of a class or function — why it exists. Never the *what/how*; well-named identifiers cover that. Default to no comment; one line when the goal is non-obvious from the signature. Defer to the project's docstring convention (Google, NumPy, reST) when one exists.
+
+MUST NOT include:
+- Plans, gaps, or work scoped elsewhere ("X doesn't yet propagate; that ingestor work is scoped separately") — out of scope, rots fast
+- Issue/PR references (`#537`, `JIRA-123`) — belong in the commit message and PR description
+- Restating the code ("loops over items and filters by status")
+- Caller lists ("used by X", "called from Y") — rot as the codebase evolves
+
+Bad (mixes plan-narration, issue ref, and what/how):
+```
+"""
+Known gap (#123): the update only applies when the parent record is in
+the initial state. Records already advanced past that state do not yet
+receive the propagated value; that follow-up is scoped separately.
+"""
+```
 
 ### Output style
 
