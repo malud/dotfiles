@@ -1,0 +1,28 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+ESDM_VERSION="0.10.0"
+ESDM_BIN="$HOME/.local/bin/esdm"
+
+if [[ -x "$ESDM_BIN" ]] && "$ESDM_BIN" version 2>/dev/null | grep -q "$ESDM_VERSION"; then
+  echo "esdm $ESDM_VERSION already installed, skipping"
+  exit 0
+fi
+
+case "$(uname -m)" in
+  arm64)  ARCH="arm64" ;;
+  x86_64) ARCH="amd64" ;;
+  *)      echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;;
+esac
+
+URL="https://esdm.s3.fr-par.scw.cloud/${ESDM_VERSION}/esdm-darwin-${ARCH}"
+
+echo "Installing esdm ${ESDM_VERSION} (${ARCH})..."
+mkdir -p "$(dirname "$ESDM_BIN")"
+curl -fsSL "$URL" -o "$ESDM_BIN"
+xattr -d com.apple.quarantine "$ESDM_BIN" 2>/dev/null || true
+chmod a+x "$ESDM_BIN"
+
+echo "✓ esdm installed to $ESDM_BIN"
+{{ end -}}
