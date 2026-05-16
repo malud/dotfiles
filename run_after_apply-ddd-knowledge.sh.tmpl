@@ -8,7 +8,8 @@ if ! gh auth status &>/dev/null; then
 fi
 
 REPO="malud/domain-driven-design"
-DEST="$HOME"
+DEST="$HOME/.claude-shared"
+mkdir -p "$DEST"
 
 if ! gh api "repos/$REPO" --jq '.id' &>/dev/null; then
     echo "Skipping DDD knowledge base: no access to $REPO"
@@ -35,32 +36,31 @@ fetch_dir_recursive() {
     done
 }
 
-# 1. Merge settings.json
-mkdir -p "$DEST/.claude"
+# 1. Merge settings.json (allow-list union with whatever is already there)
 DDD_SETTINGS=$(fetch_file ".claude/settings.json")
-if [[ -f "$DEST/.claude/settings.json" ]]; then
+if [[ -f "$DEST/settings.json" ]]; then
     jq -s '.[0] as $existing | .[1] as $ddd |
         ($existing * {
             permissions: {
                 allow: ([$existing.permissions.allow, $ddd.permissions.allow] | add | unique),
                 deny: ($existing.permissions.deny // [])
             }
-        })' "$DEST/.claude/settings.json" <(echo "$DDD_SETTINGS") > "$DEST/.claude/settings.json.tmp"
-    mv "$DEST/.claude/settings.json.tmp" "$DEST/.claude/settings.json"
+        })' "$DEST/settings.json" <(echo "$DDD_SETTINGS") > "$DEST/settings.json.tmp"
+    mv "$DEST/settings.json.tmp" "$DEST/settings.json"
 else
-    echo "$DDD_SETTINGS" > "$DEST/.claude/settings.json"
+    echo "$DDD_SETTINGS" > "$DEST/settings.json"
 fi
 
 # 2. Copy agents/
-rm -rf "$DEST/.claude/agents"
-mkdir -p "$DEST/.claude/agents"
+rm -rf "$DEST/agents"
+mkdir -p "$DEST/agents"
 for file in $(fetch_dir_list ".claude/agents"); do
-    fetch_file "$file" > "$DEST/.claude/agents/$(basename "$file")"
+    fetch_file "$file" > "$DEST/agents/$(basename "$file")"
 done
 
 # 3. Copy skills/
-rm -rf "$DEST/.claude/skills"
-fetch_dir_recursive ".claude/skills" "$DEST/.claude/skills"
+rm -rf "$DEST/skills"
+fetch_dir_recursive ".claude/skills" "$DEST/skills"
 
 # 4. Copy languages/ and references/
 for dir in languages references; do
@@ -190,6 +190,16 @@ Obsidian includes a CLI for vault management. Binary is at `/Applications/Obsidi
 
 HEADER
 echo "$DDD_CLAUDE" >> "$DEST/CLAUDE.md"
+
+# 6. Materialize CLAUDE.md per profile = shared + optional ${profile}/CLAUDE.md.local
+for profile in "$HOME/.claude-private" "$HOME/.claude-client"; do
+    [[ -d "$profile" ]] || continue
+    cp "$DEST/CLAUDE.md" "$profile/CLAUDE.md"
+    if [[ -f "$profile/CLAUDE.md.local" ]]; then
+        printf '\n---\n\n' >> "$profile/CLAUDE.md"
+        cat "$profile/CLAUDE.md.local" >> "$profile/CLAUDE.md"
+    fi
+done
 
 echo "DDD knowledge base applied"
 {{ end -}}

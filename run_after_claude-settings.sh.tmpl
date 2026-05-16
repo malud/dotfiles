@@ -2,8 +2,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SETTINGS="$HOME/.claude/settings.json"
-mkdir -p "$HOME/.claude"
+SETTINGS="$HOME/.claude-shared/settings.json"
+mkdir -p "$HOME/.claude-shared"
 
 {{ if lookPath "rtk" -}}
 RTK_HOOK_CMD='rtk hook claude'
@@ -54,7 +54,7 @@ ENFORCED='{{ `{
           },
           {
             "type": "command",
-            "command": "bash HOME_PLACEHOLDER/.claude/hooks/gitui-before-commit.sh"
+            "command": "bash HOME_PLACEHOLDER/.claude-shared/hooks/gitui-before-commit.sh"
           }
         ]
       }
@@ -62,7 +62,7 @@ ENFORCED='{{ `{
   },
   "statusLine": {
     "type": "command",
-    "command": "bash HOME_PLACEHOLDER/.claude/statusline-command.sh"
+    "command": "bash HOME_PLACEHOLDER/.claude-shared/statusline-command.sh"
   }
 }` }}'
 ENFORCED="${ENFORCED//RTK_HOOK_CMD_PLACEHOLDER/$RTK_HOOK_CMD}"

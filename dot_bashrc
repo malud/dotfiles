@@ -208,15 +208,28 @@ alias git-prune-local=git_prune_local
 #   ralph < prompt.md       # Run forever, 25 turns per iteration (default)
 #   ralph 50 < prompt.md    # Run forever, 50 turns per iteration
 ralph() {
-  local prompt max_turns
+  local prompt max_turns profile cfg_dir
   prompt=$(cat)
   max_turns=${1:-25}
 
+  read -rp "Profile (p)rivate / (c)lient: " profile < /dev/tty
+  case "$profile" in
+    p|private) cfg_dir="$HOME/.claude-private" ;;
+    c|client)  cfg_dir="$HOME/.claude-client" ;;
+    *) echo "Unknown profile: $profile" >&2; return 1 ;;
+  esac
+
   while true; do
-    echo "$prompt" | claude -p --dangerously-skip-permissions --max-turns "$max_turns" -
+    echo "$prompt" | CLAUDE_CONFIG_DIR="$cfg_dir" claude -p --dangerously-skip-permissions --max-turns "$max_turns" -
     sleep 1
   done
 }
+
+# Claude Code subscription profiles — placed after function defs so `ralph`'s
+# bare `claude` keeps invoking the binary, not the fail-loud alias below.
+alias claude-private='CLAUDE_CONFIG_DIR="$HOME/.claude-private" command claude'
+alias claude-client='CLAUDE_CONFIG_DIR="$HOME/.claude-client" command claude'
+alias claude='printf "\033[33m\033[0m Pick a profile: \033[1m claude-private\033[0m or \033[1m claude-client\033[0m\n" >&2; false'
 
 # Zoxide (smarter cd)
 if command -v zoxide &>/dev/null; then
