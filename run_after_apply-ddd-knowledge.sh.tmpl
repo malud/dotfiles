@@ -90,6 +90,14 @@ Before implementing, testing, or reviewing, read project rules first. They overr
 
 For any third-party API, SDK, library, framework, CLI tool, or cloud service, query context7 first (`mcp__plugin_context7_context7__resolve-library-id`, then `mcp__plugin_context7_context7__query-docs`). Default to it even for libraries you "know" — training data lags shipped behavior. Skip only for general programming concepts, business-logic debugging, or refactors that don't touch external APIs.
 
+### Parsing structured data
+
+For reading, filtering, or transforming structured data, MUST use `jq` for JSON and `yq` for YAML. Both binaries are always present — assume them. MUST NOT write your own snippet in any language (Python, grep/sed/awk, regex, inline parsing) to read these formats.
+
+### Shell hygiene
+
+MUST NOT pipe outputs through temporary text files. This applies especially in auto mode and to parallel `git add` / `git commit` calls — pass data directly via pipes, command substitution, or process substitution instead of staging it in a `/tmp` file.
+
 ### Think before coding
 
 - State assumptions explicitly. If uncertain, ask — don't pick silently.
