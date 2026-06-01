@@ -2,7 +2,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ESDM_VERSION="0.10.0"
+ESDM_VERSION="0.12.0"
 ESDM_BIN="$HOME/.local/bin/esdm"
 
 if [[ -x "$ESDM_BIN" ]] && "$ESDM_BIN" version 2>/dev/null | grep -q "$ESDM_VERSION"; then
