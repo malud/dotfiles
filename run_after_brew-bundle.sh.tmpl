@@ -12,7 +12,10 @@ else
 fi
 
 brew update
-brew bundle --file="${HOME}/.Brewfile"
+# A single failing formula (e.g. a transient symlink conflict) makes brew bundle
+# exit non-zero even though it installed everything else; don't let that abort
+# the upgrade/cleanup that follow.
+brew bundle --file="${HOME}/.Brewfile" || echo "⚠️  brew bundle reported failures; continuing"
 brew upgrade
 brew cleanup
 {{ else -}}
