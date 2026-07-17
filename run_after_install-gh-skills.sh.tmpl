@@ -1,0 +1,14 @@
+{{ if lookPath "gh" -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! gh auth status &>/dev/null; then
+    echo "Skipping gh skills: gh not authenticated"
+    exit 0
+fi
+
+# Runs after apply-ddd-knowledge, which wipes and rebuilds ~/.claude-shared/skills
+gh skill install github/gh-stack gh-stack --dir "$HOME/.claude-shared/skills" --force
+
+echo "gh skills applied"
+{{ end -}}
