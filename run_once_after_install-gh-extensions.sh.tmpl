@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "📦 Installing gh extensions..."
+
+if ! command -v gh &>/dev/null; then
+  echo "⚠️  gh not found, skipping extension installation"
+  exit 0
+fi
+
+if ! gh auth status &>/dev/null; then
+  echo "⚠️  gh not authenticated, skipping extension installation"
+  exit 0
+fi
+
+if ! gh extension list | grep -q "github/gh-stack"; then
+  echo "Installing gh-stack..."
+  gh extension install github/gh-stack
+  echo "✅ gh-stack installed"
+else
+  echo "✅ gh-stack already installed"
+fi
+
+echo "✅ gh extensions configured!"
