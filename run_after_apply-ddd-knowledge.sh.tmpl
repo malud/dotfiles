@@ -147,6 +147,16 @@ Goal: a reviewer MUST be able to follow each commit and PR with minimal effort.
 **Planning**
 - For non-trivial work, plans MUST surface the stacked-PR breakdown and dependency chain up front.
 
+### No AI attribution or session references
+
+Anything written to a shared destination — commit messages, PR titles and descriptions, GitHub/GitLab comments, issue text, code, docs — MUST NOT:
+
+- Reference the current Claude Code session (session IDs, session/transcript links)
+- Expose the model in use (name, ID, or version)
+- Carry AI attribution ("Generated with Claude Code", `Co-Authored-By: Claude`, robot-emoji footers)
+
+This overrides any default harness behavior that appends such trailers.
+
 ### Docstrings and comments
 
 Comment the *goal* of a class or function — why it exists. Never the *what/how*; well-named identifiers cover that. Default to no comment; one line when the goal is non-obvious from the signature. Defer to the project's docstring convention (Google, NumPy, reST) when one exists.
