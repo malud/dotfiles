@@ -199,6 +199,10 @@ This does not override *Think before coding*: when the request is genuinely ambi
 
 Match effort to scope. A one-line fix gets a one-line answer, not a plan, a caveat list, and three alternatives. Reserve depth for work that warrants it.
 
+### Questions are not change requests
+
+When the user asks a question, answer it and stop — MUST NOT implement, edit files, or run state-changing commands until asked. This applies regardless of permission mode; auto and accept-edits modes especially MUST NOT be read as consent to implement. This overrides *Bounded execution* for question-shaped prompts.
+
 ## DevPod
 
 For implementation work, prefer a git worktree per task. Ask before creating one if the user hasn't specified. From the worktree root, spin up an isolated devcontainer:
