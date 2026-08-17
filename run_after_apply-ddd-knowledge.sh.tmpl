@@ -132,7 +132,7 @@ Goal: a reviewer MUST be able to follow each commit and PR with minimal effort.
 **Commits**
 - Each commit MUST be cohesive — one topic, self-contained, split by cohesion not by file.
 - Stage hunks with `git add -p`.
-- Commit messages MUST be one or two sentences explaining the *why*.
+- Commit messages MUST be one or two sentences explaining the *why*. One-line messages MUST use ASD-STE100 (see *Simplified Technical English*).
 - Commits MUST NOT be amended — history preserves change reasoning.
 - When the split is unclear, MUST ask the user before committing.
 
@@ -175,6 +175,16 @@ the initial state. Records already advanced past that state do not yet
 receive the propagated value; that follow-up is scoped separately.
 """
 ```
+
+### Simplified Technical English (ASD-STE100)
+
+MUST write the following in ASD-STE100 (Simplified Technical English):
+
+- Descriptions/docstrings of complex methods (when a comment is warranted per *Docstrings and comments*)
+- GitHub issue titles and bodies
+- One-line commit messages
+
+Core STE rules: short sentences, active voice, one instruction or topic per sentence, approved simple vocabulary, no noun clusters longer than three words.
 
 ### Output style
 
