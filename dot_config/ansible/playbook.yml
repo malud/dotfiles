@@ -67,6 +67,8 @@
         state: present
       when: ansible_facts['pkg_mgr'] in ["dnf", "dnf5", "yum"]
 
+    # neovim and eza come from apk because the GitHub release binaries
+    # are glibc-linked and do not run on musl
     - name: Install core CLI tools (apk)
       become: true
       apk:
@@ -75,6 +77,8 @@
           - fd
           - ripgrep
           - fzf
+          - neovim
+          - eza
           - netcat-openbsd
           - nmap
           - iputils
