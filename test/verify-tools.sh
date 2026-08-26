@@ -36,14 +36,19 @@ warn() {
   echo -e "${YELLOW}⚠${NC} $1"
 }
 
-# Check if a command exists and is executable
+# Check that a command exists AND runs. `command -v` alone passes for
+# binaries linked against the wrong libc (e.g. glibc builds on musl).
 check_tool() {
   local tool="$1"
+  shift
+  local version_args=("${@:---version}")
 
-  if command -v "$tool" &>/dev/null; then
-    pass "$tool"
-  else
+  if ! command -v "$tool" &>/dev/null; then
     fail "$tool (not found)"
+  elif ! "$tool" "${version_args[@]}" &>/dev/null; then
+    fail "$tool (found but does not run)"
+  else
+    pass "$tool"
   fi
 }
 
@@ -110,9 +115,9 @@ check_tool just
 
 echo ""
 echo "--- Kubernetes Tools ---"
-check_tool kubectl
-check_tool kustomize
-check_tool k9s
+check_tool kubectl version --client
+check_tool kustomize version
+check_tool k9s version
 
 echo ""
 echo "--- Configuration Files ---"
