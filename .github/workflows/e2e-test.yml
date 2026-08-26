@@ -32,10 +32,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install just
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@v3
 
       - name: Run E2E tests
         run: just test "${{ matrix.image }}"
