@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Move the Codex Micro daemon to another herdr session. It serves only the
+# session that started it, so switching between client and private needs this.
+set -euo pipefail
+
+session="${1:-}"
+if [[ -z "$session" ]]; then
+  echo "usage: herdr-micro <client|private|default>" >&2
+  exit 2
+fi
+
+exec herdr plugin action invoke alasano.codex-micro.restart --session "$session"

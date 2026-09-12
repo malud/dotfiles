@@ -1,0 +1,24 @@
+{
+  "bindings": {
+    "ACT07": {
+      "tap": { "herdr-key": "esc" },
+      "hold": {
+        "exec": [
+          "sh", "-c",
+          "s=\"${HERDR_SOCKET_PATH:-$HOME/.config/herdr/herdr.sock}\"; n=\"$(herdr session list --json | jq -r --arg s \"$s\" '.sessions[] | select(.socket_path==$s) | .name')\"; exec herdr ${n:+--session \"$n\"} plugin action invoke toggle --plugin persiyanov.reviewr"
+        ]
+      }
+    },
+    "ACT11": {
+      "key": "ropt"
+    },
+    "ACT12": {
+      "key": "return"
+    },
+    "joystick": {
+      "up": { "herdr-key": "up" },
+      "down": { "herdr-key": "down" }
+    }
+  },
+  "policy": "sticky"
+}

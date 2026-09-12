@@ -6,5 +6,7 @@ CLAUDE.md
 .config/ansible
 {{ else }}
 .config/ghostty
+.config/herdr/plugins/config/alasano.codex-micro
+.local/bin/herdr-micro
 {{ end }}
 
