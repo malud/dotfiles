@@ -1,0 +1,19 @@
+{{ if ne .chezmoi.os "windows" -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Herdr's own installer on every platform, so `herdr update` works the same
+# everywhere. Kept out of the Brewfile on purpose: a second binary on PATH
+# would shadow the first.
+if command -v herdr &>/dev/null; then
+  echo "herdr already installed ($(herdr --version)), skipping"
+  exit 0
+fi
+
+echo "Installing herdr via native installer..."
+if curl -fsSL https://herdr.dev/install.sh | sh; then
+  echo "✓ herdr installed"
+else
+  echo "⚠️  herdr installer failed; see https://herdr.dev/docs/install"
+fi
+{{ end -}}
