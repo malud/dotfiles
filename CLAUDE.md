@@ -140,7 +140,7 @@ Herdr runs one server per named session. Sessions share `~/.config/herdr/config.
 └── herdr-micro     re-binds the Codex Micro daemon to a session; it serves only the session that started it
 ```
 
-Both launchers render from `.chezmoitemplates/herdr-profile.sh`. `run_once_after_install-herdr.sh.tmpl` installs Herdr with its own installer, not Homebrew, so `herdr update` works the same on every platform. `run_onchange_after_install-herdr-plugins.sh.tmpl` installs `persiyanov.reviewr` and, on macOS, `alasano.codex-micro` from the fork branch `integration/creator-micro-2` until the upstream PRs merge; a plugin that is already present, such as a `herdr plugin link` to a local checkout, is left alone.
+Both launchers render from `.chezmoitemplates/herdr-profile.sh`. `run_once_after_install-herdr.sh.tmpl` installs Herdr with its own installer, not Homebrew, so `herdr update` works the same on every platform. `run_onchange_after_install-herdr-plugins.sh.tmpl` installs Herdr's pi status integration, `persiyanov.reviewr`, and, on macOS, `alasano.codex-micro` from the fork branch `integration/creator-micro-2` until the upstream PRs merge; a plugin that is already present, such as a `herdr plugin link` to a local checkout, is left alone.
 
 ## Key Files
 
@@ -159,7 +159,7 @@ Both launchers render from `.chezmoitemplates/herdr-profile.sh`. `run_once_after
 | `dot_config/herdr/` | `~/.config/herdr/` | Herdr config and plugin configs, shared by all sessions |
 | `.chezmoitemplates/herdr-profile.sh`, `dot_local/bin/executable_herdr-{client,private}.tmpl` | `~/.local/bin/herdr-{client,private}` | Per-profile Herdr session launchers |
 | `dot_local/bin/executable_herdr-micro` | `~/.local/bin/herdr-micro` | Re-binds the Codex Micro daemon to a session |
-| `run_once_after_install-herdr.sh.tmpl`, `run_onchange_after_install-herdr-plugins.sh.tmpl` | `herdr` binary, plugins | Herdr installer and plugin installs (reviewr; codex-micro on macOS) |
+| `run_once_after_install-herdr.sh.tmpl`, `run_onchange_after_install-herdr-plugins.sh.tmpl` | `herdr` binary, pi integration, plugins | Herdr installer, pi status integration, and plugin installs (reviewr; codex-micro on macOS) |
 
 ## Code Style
 

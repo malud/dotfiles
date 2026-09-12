@@ -7,6 +7,15 @@ if ! command -v herdr &>/dev/null; then
   exit 0
 fi
 
+pi_integration_status="$(herdr integration status 2>/dev/null | grep '^pi:' || true)"
+if [[ "$pi_integration_status" == pi:\ current* ]]; then
+  echo "✅ Herdr pi integration already current"
+elif herdr integration install pi; then
+  echo "✅ Herdr pi integration installed"
+else
+  echo "⚠️  Herdr pi integration failed to install"
+fi
+
 installed="$(herdr plugin list --json 2>/dev/null | jq -r '.result.plugins[].plugin_id' || true)"
 
 # A plugin that is already present stays as it is: a `herdr plugin link` to a
