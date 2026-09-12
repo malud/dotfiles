@@ -123,6 +123,25 @@ Claude Code config is split across three home-directory locations to support two
 
 To change the preamble, edit the heredoc in `run_after_apply-ddd-knowledge.sh.tmpl` then `chezmoi apply`. To change the DDD content, edit the upstream repo.
 
+## Herdr Layout: shared config + per-profile sessions
+
+Herdr runs one server per named session. Sessions share `~/.config/herdr/config.toml` and the plugin configs; workspaces, panes, agents and shell history are per session.
+
+```
+~/.config/herdr/
+├── config.toml                                     chezmoi-tracked (dot_config/herdr/); binds cmd+r to the reviewr toggle
+├── plugins/config/alasano.codex-micro/config.json  chezmoi-tracked; the daemon rewrites "policy" on toggle
+├── plugins/config/persiyanov.reviewr/config.toml   chezmoi-tracked
+└── plugins.json, session.json, *.sock, *.log       runtime state, untracked
+
+~/.local/bin/
+├── herdr-client    herdr --session client  + CLAUDE_CONFIG_DIR=~/.claude-client, CODEX_HOME=~/.codex-client, own HISTFILE
+├── herdr-private   herdr --session private + CLAUDE_CONFIG_DIR=~/.claude-private, default Codex login, own HISTFILE
+└── herdr-micro     re-binds the Codex Micro daemon to a session; it serves only the session that started it
+```
+
+Both launchers render from `.chezmoitemplates/herdr-profile.sh`. `run_once_after_install-herdr.sh.tmpl` installs Herdr with its own installer, not Homebrew, so `herdr update` works the same on every platform. `run_onchange_after_install-herdr-plugins.sh.tmpl` installs `persiyanov.reviewr` and, on macOS, `alasano.codex-micro` from the fork branch `integration/creator-micro-2` until the upstream PRs merge; a plugin that is already present, such as a `herdr plugin link` to a local checkout, is left alone.
+
 ## Key Files
 
 | Source File | Destination | Purpose |
@@ -137,6 +156,10 @@ To change the preamble, edit the heredoc in `run_after_apply-ddd-knowledge.sh.tm
 | `dot_claude-private/`, `dot_claude-client/` | `~/.claude-private/`, `~/.claude-client/` | Subscription profile dirs (mostly symlinks into `.claude-shared/`) |
 | `run_after_claude-settings.sh.tmpl` | `~/.claude-shared/settings.json` | Builds settings.json (defaults + existing + enforced hook/statusline paths) |
 | `run_after_apply-ddd-knowledge.sh.tmpl` | `~/.claude-shared/{CLAUDE.md,agents,skills,references,languages,settings.json}` + per-profile `CLAUDE.md` | Fetches DDD knowledge base, assembles shared CLAUDE.md, materializes per-profile CLAUDE.md |
+| `dot_config/herdr/` | `~/.config/herdr/` | Herdr config and plugin configs, shared by all sessions |
+| `.chezmoitemplates/herdr-profile.sh`, `dot_local/bin/executable_herdr-{client,private}.tmpl` | `~/.local/bin/herdr-{client,private}` | Per-profile Herdr session launchers |
+| `dot_local/bin/executable_herdr-micro` | `~/.local/bin/herdr-micro` | Re-binds the Codex Micro daemon to a session |
+| `run_once_after_install-herdr.sh.tmpl`, `run_onchange_after_install-herdr-plugins.sh.tmpl` | `herdr` binary, plugins | Herdr installer and plugin installs (reviewr; codex-micro on macOS) |
 
 ## Code Style
 

@@ -37,9 +37,11 @@ That's it! Packages install automatically using the best method for your platfor
 - All packages from Brewfile (60+ formulae, 6+ casks)
 - Nerd Fonts, Ghostty, Docker Desktop, and more
 - devpod docker provider configuration
+- Herdr with the reviewr and codex-micro plugins, plus `herdr-client` / `herdr-private` session launchers
 
 **Linux:**
 - **Ansible-based** declarative tool management
+- Herdr with the reviewr plugin, plus `herdr-client` / `herdr-private` session launchers
 - Essential tools via native package manager (apt/dnf/yum/apk)
 - Modern CLI tools: eza, bat, fd, ripgrep, fzf, gping, trippy
 - Development tools: neovim (with Lazy.nvim), git, jq
@@ -79,7 +81,11 @@ chezmoi apply -v
 ├── run_once_after_install-krew-plugins.sh.tmpl # Install kubectl krew plugins
 ├── run_once_after_install-devpod-provider.sh.tmpl  # Install devpod docker provider
 ├── run_onchange_update-brew.sh.tmpl            # Auto-update brew on changes (macOS)
+├── run_once_after_install-herdr.sh.tmpl        # Install Herdr via its installer
+├── run_onchange_after_install-herdr-plugins.sh.tmpl  # Install Herdr plugins (reviewr, codex-micro on macOS)
+├── dot_local/bin/                              # herdr-client, herdr-private, herdr-micro
 └── dot_config/
+    ├── herdr/                                  # Herdr config and plugin configs (shared by all sessions)
     ├── starship.toml                           # Starship prompt (Catppuccin Mocha)
     ├── nvim/
     │   └── init.lua                  # Neovim config (Catppuccin Mocha)

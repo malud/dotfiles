@@ -13,6 +13,15 @@ chezmoi cd                                           # Go to source directory
 chezmoi status                                       # Show changes
 ```
 
+## Herdr Sessions
+
+```bash
+herdr-client                 # Herdr in the client session: client Claude/Codex logins, own history
+herdr-private                # Herdr in the private session: private Claude login, own history
+herdr-micro client           # Move the Codex Micro daemon to a session (client|private|default)
+herdr session list           # Show sessions
+```
+
 ## Homebrew Commands (macOS)
 
 ```bash
